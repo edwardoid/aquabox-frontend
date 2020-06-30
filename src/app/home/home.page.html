@@ -34,7 +34,7 @@
     </ion-card>
   </ion-list>
 
-  <div class="col col-50 padding-vertical padding-horisontal" *ngIf="!aquabox.hosts.isEmpty()"></div>
+  <div class="col col-50 padding-vertical padding-horisontal" *ngIf="!(aquabox.hosts === undefined ? true : aquabox.hosts.isEmpty())"></div>
 
   <ion-card (click)='addNewDevice();'>
     <ion-card-header>

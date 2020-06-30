@@ -1,7 +1,7 @@
+import { BoxStatus } from './box-status';
 import { UpdateConsumer } from './update-consumer';
 import { DevicesMap, RulesMap } from './id-map';
 import { Rule } from './rule';
-import { Device } from './device';
 import { AquaBoxService } from './aqua-box.service';
 import { Serializable, Serialize } from 'ts-serializer';
 import { UpdateEvent } from './update-event';
@@ -26,6 +26,7 @@ export class Aquabox extends Serializable{
     public rules: RulesMap = new RulesMap()
     public internal: Object =  new Object()
     public connected: boolean
+    public status: BoxStatus
 
     public constructor(public service: AquaBoxService,
                        public configuration: AquaBoxConfiguration) {
@@ -33,6 +34,7 @@ export class Aquabox extends Serializable{
         this.id = this.configuration.id;
         this.updateConsumer = new UpdateConsumer(this.service, UpdateEvent.Aquabox, this.id, this.id);
         this.updateConsumer.subscribe(this);
+        this.getStatus();
     }
 
     async getDevices(success: (devices: DevicesMap) => void, fail?: () => void) {
@@ -67,5 +69,9 @@ export class Aquabox extends Serializable{
 
     deleteRule(rule: Rule, success ?: (result: boolean) => void) {
         this.service.deleteRule(this, rule, success);
+    }
+
+    getStatus(success ?: (result: boolean) => void) {
+        this.service.getStatus(this, success);
     }
 }

@@ -89,6 +89,10 @@ export class DevicesPage implements OnInit {
     }
   }
 
+  setupDevice(dev) {
+    this.navi.navigateForward("/device-setup/" + this.box.configuration.id + "/" + dev.id);
+  }
+
   enableRulesOn(dev) {
     dev.rulesEnabled = true;
     dev.update((ok: boolean) => {

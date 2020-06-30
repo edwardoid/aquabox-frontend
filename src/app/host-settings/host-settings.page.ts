@@ -1,9 +1,10 @@
-import { AquaBoxConfiguration } from './../aquabox';
+import { AquaBoxConfiguration, Aquabox } from './../aquabox';
 import { AquaBoxService } from './../aqua-box.service';
 import { ActivatedRoute } from '@angular/router';
 import { Component, OnInit, ViewChild, ElementRef, OnChanges, SimpleChanges } from '@angular/core';
 import { NavController, LoadingController, AlertController } from '@ionic/angular';
 import { toCanvas } from 'qrcode';
+import { NetworkStatus } from '../box-status';
 
 @Component({
   selector: 'app-host-settings',
@@ -12,6 +13,7 @@ import { toCanvas } from 'qrcode';
 })
 export class HostSettingsPage implements OnInit {
   configuration: AquaBoxConfiguration = new AquaBoxConfiguration();
+  box: Aquabox = null;
   
   @ViewChild('qrCanvas')
   qrCanvas: ElementRef;
@@ -29,7 +31,8 @@ export class HostSettingsPage implements OnInit {
 
   ngOnInit() {
     let boxId = this.route.snapshot.paramMap.get('box');
-    let src = this.aquabox.hosts.find(boxId).configuration;
+    this.box = this.aquabox.hosts.find(boxId);
+    let src = this.box.configuration;
     this.configuration.id = src.id;
     this.configuration.api = src.api;
     this.configuration.host = src.host;

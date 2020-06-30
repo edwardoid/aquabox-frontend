@@ -10,6 +10,7 @@ import { Injectable, EventEmitter, Self } from '@angular/core';
 import { Device } from './device';
 import { Aquabox, AquaBoxConfiguration } from './aquabox';
 import { $WebSocket } from 'angular2-websocket/angular2-websocket';
+import { BoxStatus } from './box-status';
 
 @Injectable({
   providedIn: 'root'
@@ -114,6 +115,7 @@ export class AquaBoxService {
     ws.onOpen(() => {
       this.ws[key] = ws;
       this.connected(aquabox.id, key, true);
+      aquabox.getStatus(); // Update status if we have connection
     });
     ws.onMessage((message: MessageEvent) => {
       let event = new UpdateEvent();
@@ -347,6 +349,24 @@ export class AquaBoxService {
         this.apiError(error);
         result(false);
       });
+  }
+
+  getStatus(box: Aquabox, success ?: (result: boolean) => void) {
+    let statusUrl = this.baseUrlFromConfiguration(box.configuration) + "status";
+    this.http.get<Object>(statusUrl).subscribe((status) => {
+      if (!box.status) {
+        box.status = new BoxStatus();
+      }
+      box.status.deserialize(status["aquabox"])
+      if(success) {
+        success(true);
+      }
+    },
+    () => { 
+      if(success)
+        success(false);
+      }
+    )
   }
 
   testConfiguration(configuration: AquaBoxConfiguration, result : (ok: boolean) => void) {

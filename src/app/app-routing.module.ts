@@ -32,7 +32,8 @@ const routes: Routes = [
     loadChildren: './rule-wizard/rule-wizard.module#RuleWizardPageModule'
   },
   { path: 'add-new-host', loadChildren: './add-new-host/add-new-host.module#AddNewHostPageModule' },
-  { path: 'settings/:box', loadChildren: './host-settings/host-settings.module#HostSettingsPageModule' }
+  { path: 'settings/:box', loadChildren: './host-settings/host-settings.module#HostSettingsPageModule' },
+  { path: 'device-setup/:box/:dev', loadChildren: './device-setup/device-setup.module#DeviceSetupPageModule' }
 ];
 
 @NgModule({

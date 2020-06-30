@@ -1,0 +1,63 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
+    <ion-buttons slot="primary">
+      <ion-button color="secondary" (click)="save()" >
+        <ion-icon slot="start" name="checkmark"></ion-icon>
+        Save
+      </ion-button>
+    </ion-buttons>
+    <ion-title>{{device.name}} Settings</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-list>
+    <ion-list-header>Device</ion-list-header>
+    <ion-item>
+      <ion-label color="primary" stacked>Name</ion-label>
+      <ion-input placeholder="Name of the device" [(ngModel)]="name"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label color="primary" position="stacked">Type</ion-label>
+      <ion-select okText="Okay" cancelText="Cancel" [(ngModel)]="type">
+        <ion-select-option value="internal_filter">Internal filter</ion-select-option>
+        <ion-select-option value="external_filter">External filter</ion-select-option>
+        <ion-select-option value="light">Light</ion-select-option>
+        <ion-select-option value="air_pump">Air pump</ion-select-option>
+        <ion-select-option value="water_pump">Water pump</ion-select-option>
+        <ion-select-option value="heater">heaer</ion-select-option>
+        <ion-select-option value="uv">UV</ion-select-option>
+        <ion-select-option value="cooler">Cooler</ion-select-option>
+        <ion-select-option value="fertilizer">Nutriens dosator</ion-select-option>
+        <ion-select-option value="ph">pH controller</ion-select-option>
+        <ion-select-option value="other">Other</ion-select-option>
+      </ion-select>
+    </ion-item>
+
+    <ion-item>
+      <ion-label color="primary" position="stacked">Vendor</ion-label>
+      <ion-select value="other" okText="Okay" cancelText="Cancel" [(ngModel)]="model">
+        <ion-select-option value="eheim">Eheim</ion-select-option>
+        <ion-select-option value="dennerle">Dennerle</ion-select-option>
+        <ion-select-option value="aquael">Aquael</ion-select-option>
+        <ion-select-option value="jbl">JBL</ion-select-option>
+        <ion-select-option value="ada">ADA</ion-select-option>
+        <ion-select-option value="sera">Red</ion-select-option>
+        <ion-select-option value="tetra">Tetra</ion-select-option>
+        <ion-select-option value="hobby">Hobby</ion-select-option>
+        <ion-select-option value="twinstar">Twinstar</ion-select-option>
+        <ion-select-option value="daytime">DayTime</ion-select-option>
+        <ion-select-option value="chihiros">Chihiros</ion-select-option>
+        <ion-select-option value="atman">Atman</ion-select-option>
+        <ion-select-option value="sunsun">SunSun</ion-select-option>
+      </ion-select>
+    </ion-item>
+    <ion-item>
+      <ion-label color="primary" stacked>Additional</ion-label>
+      <ion-input placeholder="Power, model, etc..." [(ngModel)]="addditional"></ion-input>
+    </ion-item>
+  </ion-list>
+</ion-content>
