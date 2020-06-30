@@ -131,13 +131,7 @@ export class RuleWizardPage implements OnInit {
       this.rule.actions[i].at = Date.parse(this.dates[i]);
     }
     if (this.rule.id == "-1") {
-      let id = this.rule.name + "_" + Math.floor(Math.random() * 1000000000000);
-      let forbiddenSymbols = [ "/", " ", ".", "\\", "\t" ];
-      for(let i of forbiddenSymbols) {
-        id = id.replace(forbiddenSymbols[i], "_");
-      }
-
-      this.rule.id = id;
+      this.rule.generateId();
     }
     this.aquabox.getHosts((hosts: HostsMap) => {
       for (let host of hosts) {

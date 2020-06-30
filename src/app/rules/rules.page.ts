@@ -1,3 +1,5 @@
+import { RepeatTimeout } from './../repeattimeoutunit';
+import { Action } from './../action';
 import { UpdateEvent } from './../update-event';
 import { Rule } from './../rule';
 import { HostsMap, RulesMap } from './../id-map';
@@ -8,6 +10,8 @@ import { Device } from '../device';
 import { ActivatedRoute } from '@angular/router';
 import { Aquabox } from '../aquabox';
 import { trigger, style, transition, animate } from "@angular/animations"
+import { ActionType } from '../actiontype';
+import { Repeat } from '../repeat';
 
 @Component({
   selector: 'app-rules',
@@ -33,8 +37,8 @@ export class RulesPage implements OnInit {
 
   private box: Aquabox;
   public device: Device
-
   public rules: RulesMap;
+  public now: number = Date.now();
 
   constructor(private navi: NavController,
               private aquabox: AquaBoxService,
@@ -79,6 +83,20 @@ export class RulesPage implements OnInit {
         self.rules.insert(r, true)
       }
     });
+
+    setInterval(() => {
+      self.now = Date.now();
+    }, 1000);
+  }
+
+  remain(repeat: Repeat) {
+    let n = ((repeat.deleteAfter- this.now) / 1000) % 3600;
+    let mins = Math.ceil(n / 60);
+    let seconds = Math.ceil(n % 60);
+    if (mins > 0)
+      return  mins + "m. " + seconds + "s.";
+    else
+      return seconds + "s.";
   }
 
   toggleEnabled(rule: Rule) {
@@ -90,6 +108,28 @@ export class RulesPage implements OnInit {
 
   addNewRule() {
     this.navi.navigateForward("rule-wizard/" + this.box.configuration.id + "/" + this.device.id)
+  }
+
+  createTemporaryRule(timeoutInMinutes) {
+    let rule = new Rule(this.box);
+    rule.name = "Toggle in " + timeoutInMinutes + " minutes."
+    rule.generateId();
+    let first = new Action();
+    first.at = Date.now();
+    first.type = this.device.isOn ? ActionType.TurnOff : ActionType.TurnOn;
+
+    let second = new Action();
+    second.at = Date.now() + 60000 * timeoutInMinutes;
+    second.type = this.device.isOn ? ActionType.TurnOn : ActionType.TurnOff;
+
+    rule.device = this.device.id;
+    rule.repeat.unit = RepeatTimeout.Hour;
+    rule.repeat.deleteAfter = second.at + 1000;
+    rule.created_at = Date.now();
+    rule.lastRun = Date.now();
+    rule.actions = [ first, second ];
+
+    rule.save();
   }
 
   async removeRule(rule: Rule) {

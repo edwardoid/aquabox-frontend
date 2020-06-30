@@ -9,7 +9,6 @@
   </ion-toolbar>
 </ion-header>
 <ion-content>
-  <ion-button (click)="addNewRule()">Add new rule</ion-button>
   <ion-list @listItemState *ngFor="let rule of rules">
     <ion-card color="light">
       <ion-card-header>
@@ -18,7 +17,8 @@
             <h1>{{rule.name}}</h1>
           </ion-label>
           <div style="float: right;">
-            <ion-toggle slot="start" style="vertical-align: middle;" color="success" checked="{{rule.enabled}}" (click)="toggleEnabled(rule)" >
+            <ion-toggle slot="start" style="vertical-align: middle;" color="success" checked="{{rule.enabled}}"
+              (click)="toggleEnabled(rule)">
             </ion-toggle>
             <ion-button slot="end" fill="clear" style="vertical-align: middle;" color="danger"
               (click)="removeRule(rule)">
@@ -38,23 +38,30 @@
             <h1>at {{ action.at | date:'HH:mm' }}</h1>
           </ion-text>
         </ion-item>
+        <ion-label *ngIf="rule.repeat.deleteAfter > 0" color="dark">Will expire on {{remain(rule.repeat)}}</ion-label>
       </ion-card-content>
     </ion-card>
   </ion-list>
 
 
 
-  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-      <ion-fab-button mode="ios">
-          <ion-icon name="add"></ion-icon>
-        </ion-fab-button>
-        <ion-fab-list side="top">
-            <ion-fab-button>
-                <ion-icon name="logo-facebook"></ion-icon>
-                <ion-label>here</ion-label>
-            </ion-fab-button>
-            <ion-fab-button>Twitter</ion-fab-button>
-            <ion-fab-button>Youtube</ion-fab-button>
-        </ion-fab-list>
-    </ion-fab>
+  <ion-fab vertical="bottom" horizontal="end">
+    <ion-fab-button color="success">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+    <ion-fab-list side="top">
+      <ion-fab-button (click)="createTemporaryRule(10)" data-desc="Turn on/off for 10 mins" color="warning">
+        <ion-icon name="stopwatch"></ion-icon>
+      </ion-fab-button>
+      <ion-fab-button (click)="createTemporaryRule(30)" data-desc="Turn on/off for 30 mins" color="secondary">
+        <ion-icon name="stopwatch"></ion-icon>
+      </ion-fab-button>
+      <ion-fab-button (click)="createTemporaryRule(60)" data-desc="Turn on/off for 1 hour" color="primary">
+        <ion-icon name="stopwatch"></ion-icon>
+      </ion-fab-button>
+      <ion-fab-button (click)="addNewRule()" data-desc="Add new rule" large="true" color="danger" class="mainAction">
+        <ion-icon name="clock"></ion-icon>
+      </ion-fab-button>
+    </ion-fab-list>
+  </ion-fab>
 </ion-content>

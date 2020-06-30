@@ -66,20 +66,32 @@ export class Rule extends Serializable {
         this.updates = new UpdateConsumer(box.service, UpdateEvent.Rule, this.id, box.id);
     }
 
+    generateId() {
+        if (!this.id || this.id.length == 0 || this.id == "-1") {
+            let id = this.name + "_" + Math.floor(Math.random() * 1000000000000);
+            let forbiddenSymbols = [" ", "/", ".", "\\", "\t"];
+            for (let i of forbiddenSymbols) {
+                id = id.split(i).join("_");
+            }
+
+            this.id = id;
+        }
+    }
+
     subscribeForUpdates() {
         this.updates.id = this.id;
         this.updates.subscribe(this);
     }
 
-    save(success ?: (result: boolean) => void) {
+    save(success?: (result: boolean) => void) {
         this.box.createRule(this, success);
     }
 
-    update(success ?: (result: boolean) => void) {
+    update(success?: (result: boolean) => void) {
         this.box.updateRule(this, success);
     }
 
-    delete(success ?: (result: boolean) => void) {
+    delete(success?: (result: boolean) => void) {
         this.box.deleteRule(this, success);
     }
 }

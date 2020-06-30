@@ -7,16 +7,9 @@ export class Repeat  extends Serializable  {
     unit: RepeatTimeout = RepeatTimeout.Hour;
 
     @SerializeProperty({})
-    count: number = 0;
+    deleteAfter: number = 0;
 
     constructor() {
         super();
-    }
-
-    toJSONObject() {
-        return {
-            "count" : this.count,
-            "unit" : RepeatTimeoutConverter.toString(this.unit)
-        };
     }
 }
