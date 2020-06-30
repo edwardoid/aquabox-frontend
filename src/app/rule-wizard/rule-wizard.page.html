@@ -1,0 +1,100 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
+    <ion-buttons slot="primary" (click)="save()" >
+      <ion-button color="secondary">
+        <ion-icon slot="start" name="checkmark"></ion-icon>
+        Done
+      </ion-button>
+    </ion-buttons>
+    <ion-title>New rule</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content padding>
+  <div style="width: 100%">
+    <h1>Please </h1>
+    <ion-list @listItemState *ngFor="let action of rule.actions; let i = index">
+      <ion-item class="no-padding">
+        <ion-button color="{{action.type ? 'danger' : 'success'}}" class="action-button"
+          (click)="action.toggleActionType()">{{action.name()}}</ion-button>
+        <ion-text>at</ion-text>
+        <ion-button class="no-padding action-button" color="warning">
+          <ion-datetime class="no-padding" displayFormat="HH:mm" placeholder="Select time"
+            value="{{action.at.toISOString('HH:mm')}}"></ion-datetime>
+        </ion-button>
+        <div></div>
+        <div style="width: 100%"></div>
+        <ion-button color="danger" class="action-button" fill="clear" (click)="removeAction(action)">
+          <ion-icon name="close" slot="icon-only"></ion-icon>
+        </ion-button>
+      </ion-item>
+    </ion-list>
+  </div>
+  <div class="centered">
+    <ion-button (click)="addAction()">Add</ion-button>
+  </div>
+  <div style="width: 100%">
+    <h1>Do it</h1>
+    <ion-list>
+      <ion-radio-group>
+
+        <ion-item>
+          <ion-radio value="day" checked></ion-radio>
+          <ion-text>Everyday</ion-text>
+        </ion-item>
+
+        <ion-item disabled>
+          <ion-radio value="week" disabled="true"></ion-radio>
+
+          <ion-text>On</ion-text>
+          <ion-text color="primary" class="no-padding">specific week day(s)</ion-text>
+          <ion-text class="beta-feature">Not for beta</ion-text>
+        </ion-item>
+
+        <ion-item disabled>
+          <ion-radio value="monthDay" disabled="true"></ion-radio>
+
+          <ion-text>On </ion-text>
+          <ion-text color="primary" class="no-padding">5th</ion-text>
+          <ion-text>of each month</ion-text>
+          <ion-text class="beta-feature">Not for beta</ion-text>
+        </ion-item>
+      </ion-radio-group>
+    </ion-list>
+  </div>
+  <div style="width: 100%">
+    <h1>Repeat</h1>
+    <ion-list>
+      <ion-radio-group>
+        <ion-item>
+          <ion-radio value="always" checked></ion-radio>
+          <ion-text>Always</ion-text>
+        </ion-item>
+
+        <ion-item>
+          <ion-radio value="once"></ion-radio>
+          <ion-text>Once</ion-text>
+        </ion-item>
+
+        <ion-item>
+          <ion-radio value="times"></ion-radio>
+          <ion-text>Only</ion-text>
+          <div style="width: 2rem">
+            <ion-input type="number" value="{{rule.repeat.count}}" min="2" max="10000000"></ion-input>
+          </div>
+          <ion-text>times</ion-text>
+        </ion-item>
+      </ion-radio-group>
+    </ion-list>
+  </div>
+  <div style="width: 100%">
+    <h1>Ready!</h1>
+    <ion-item>
+      <ion-label>Enabled</ion-label>
+      <ion-toggle color="secondary" [(ngModel)]="rule.enabled"></ion-toggle>
+    </ion-item>
+  </div>
+</ion-content>

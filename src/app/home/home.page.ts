@@ -13,18 +13,22 @@ export class HomePage {
   errorString: string = "Nothing";
 
   constructor(private nav: NavController,
-    private aquabox: AquaBoxService,
-    private qrScanner: QRScanner) {
+              private aquabox: AquaBoxService) {
   }
 
   ngOnInit() {
   }
   gotoDevices() {
+    this.aquabox.getHosts()
     for (let k in this.aquabox.getHosts()) {
       this.nav.navigateForward("/devices/" + k);
     }
   }
   addNewDevice() {
-    this.nav.navigateForward("/qrscanning");
+    this.nav.navigateForward("/add-new-host");
+  }
+
+  addRule() {
+    this.nav.navigateForward("/rule-wizard")
   }
 }

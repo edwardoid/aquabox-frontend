@@ -26,7 +26,12 @@ const routes: Routes = [
   {
     path: 'qrscanning',
     loadChildren: './qrscanning/qrscanning.module#QRScanningPageModule'
-  }
+  },
+  {
+    path: 'rule-wizard',
+    loadChildren: './rule-wizard/rule-wizard.module#RuleWizardPageModule'
+  },
+  { path: 'add-new-host', loadChildren: './add-new-host/add-new-host.module#AddNewHostPageModule' }
 ];
 
 @NgModule({

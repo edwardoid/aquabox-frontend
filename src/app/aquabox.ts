@@ -1,15 +1,23 @@
+import { Rule } from './rule';
 import { AquaBoxService } from './aqua-box.service';
 import { Device } from './device';
+
+export class AquaBoxConfiguration {
+    public id: string = ""
+    public hostname: string = ""
+    public host: string = ""
+    public port: number
+    public protocol: string = "http"
+    public api: string = "v1"
+}
 
 export class Aquabox {
 
     public devices: Device[] = []
+    public rules: Rule[] = []
 
     public constructor(private service: AquaBoxService,
-                       public id,
-                       public hostname: string,
-                       public host: string, public port: number,
-                       public protocol: string = "http", public api: string = "v1") {
+                       public configuration: AquaBoxConfiguration) {
     }
 
     getDevices(success: (devices: Device[]) => void, fail: () => void) {
@@ -31,5 +39,17 @@ export class Aquabox {
         }
 
         return undefined;
+    }
+
+    updateRule(rule: Rule) {
+        this.service.updateRule(this, rule, true, (result: boolean) => void {
+
+        });
+    }
+
+    createRule(rule: Rule) {
+        this.service.updateRule(this, rule, true, (result: boolean) => void {
+
+        });
     }
 }

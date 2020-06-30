@@ -1,0 +1,60 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-toolbar>
+      <ion-buttons slot="start">
+        <ion-back-button></ion-back-button>
+      </ion-buttons>
+      <ion-title>
+        <ion-row>
+          <div>
+            Adding new
+          </div>
+          <div style="margin-left: 0.5rem; margin-right: 0.5rem">
+            <img src="./../assets/logo.png" style="max-height: 1.5rem;">
+          </div>
+        </ion-row>
+      </ion-title>
+    </ion-toolbar>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content padding>
+  <ion-slides pager="true" style="height: 100%" [options]="sliderOpts" #slides>
+    <ion-slide>
+      <h1>Turn off your AquaBox device if it's connected to power</h1>
+    </ion-slide>
+    <ion-slide>
+      <h1>Connect it to power and wait until it turn on again</h1>
+    </ion-slide>
+    <ion-slide>
+      <ion-content>
+        <div style="width: 100%">
+          <h1>Wait for few minutes untile you see <b>black</b> QR code. If you see the QR code press "Scan" button</h1>
+        </div>
+        <div>
+          <ion-button size="large" (click)="scan()">Ready to scan</ion-button>
+        </div>
+      </ion-content>
+    </ion-slide>
+
+    <ion-slide>
+      <div class="nameInputContainer">
+        <h1>Name your AquaBox *</h1>
+        <ion-input (ionChange)="nameChanged($event)" [(ngModel)]="name" type="text" autofocus="true" color="success" inputmode="latin-name"
+          minlength="3" placeholder="e.g. My 100l aquarium" class="nameInput">
+        </ion-input>
+
+        <h5 class="ion-text-start">
+          <ion-text color="medium">* This name will visible only in this application</ion-text>
+        </h5>
+        <ion-button color="success" size="large" (click)="addDevice()"  disabled="true" #doneButton>Done</ion-button>
+      </div>
+    </ion-slide>
+  </ion-slides>
+</ion-content>
+<ion-footer *ngIf="sliderIndex < 2" >
+  <div class="centered">
+    <ion-button class="centered" (click)="next()" full>Next
+    </ion-button>
+  </div>
+</ion-footer>

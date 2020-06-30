@@ -24,10 +24,12 @@ export class RulesPage implements OnInit {
   ngOnInit() {
     let boxId = this.route.snapshot.paramMap.get("box");
     let devId = this.route.snapshot.paramMap.get("dev");
-    this.box = this.aquabox.getHosts()[boxId];
-    if (this.box) {
-      this.device = this.box.getDevice(devId);
-    }
+    this.aquabox.getHosts((hosts: Map<string, Aquabox>) => {
+      this.box = hosts[boxId];
+      if (this.box) {
+        this.device = this.box.getDevice(devId);
+      }
+    });
   }
   // add back when alpha.4 is out
   // navigate(item) {

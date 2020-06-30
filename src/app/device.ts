@@ -24,8 +24,8 @@ export class Device {
     }
 
     image() {
-        return this.box.protocol + "://" +
-               this.box.host + ":" + this.box.port.toString() +
+        return this.box.configuration.protocol + "://" +
+               this.box.configuration.host + ":" + this.box.configuration.port.toString() +
                "/static/img/logos/" + this.meta["vendor"] + ".png";
     }
 

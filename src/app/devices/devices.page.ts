@@ -23,12 +23,14 @@ export class DevicesPage implements OnInit {
 
   async ngOnInit() {
     let boxId = this.route.snapshot.paramMap.get('box');
-    this.box = this.aquabox.getHosts()[boxId];
-    this.getDevices(undefined);
+    this.aquabox.getHosts((hosts: Map<string, Aquabox>) => {
+      this.box = this.aquabox.getHosts()[boxId];
+      this.getDevices(undefined);
+    });
   }
 
   openRules(dev: Device) {
-    this.navi.navigateForward("/rules/" + this.box.id + "/" + dev.id);
+    this.navi.navigateForward("/rules/" + this.box.configuration.id + "/" + dev.id);
   }
 
   async getDevices(event) {

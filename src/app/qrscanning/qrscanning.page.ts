@@ -1,6 +1,6 @@
 import { ScanService } from '../scanner.service';
 import { Component, OnInit } from '@angular/core';
-import { ToastController, PopoverController } from '@ionic/angular';
+import { ToastController, PopoverController, NavController } from '@ionic/angular';
 import { ScanQRHintComponent } from './scan-qrhint.component';
 
 @Component({
@@ -11,6 +11,7 @@ import { ScanQRHintComponent } from './scan-qrhint.component';
 export class QRScanningPage implements OnInit {
 
   constructor(private scanner: ScanService,
+              private navi: NavController,
               public toastController: ToastController,
               private popoverCtrl: PopoverController) {
     var self = this;
@@ -40,10 +41,11 @@ export class QRScanningPage implements OnInit {
       this.scanning = false;
       let toast = await self.toastController.create({
         message: result,
-        showCloseButton: true
+        duration: 2000
       });
 
-      toast.present();
+      //toast.present();
+      this.navi.back();
     })
   }
 
