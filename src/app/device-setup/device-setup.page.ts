@@ -5,6 +5,7 @@ import { Device } from '../device';
 import { NavController, AlertController } from '@ionic/angular';
 import { Aquabox } from './../aquabox';
 import { Component, OnInit } from '@angular/core';
+import { TranslatorService } from '../translator.service';
 
 @Component({
   selector: 'app-device-setup',
@@ -21,8 +22,52 @@ export class DeviceSetupPage implements OnInit {
   vendor: string = "other"
   model: string = ""
 
+  availableDeviceTypes = [
+    "internal_filter",
+    "external_filter",
+    "airlift_filter",
+    "sump",
+    "light",
+    "air_pump",
+    "water_pump",
+    "heater",
+    "feeder",
+    "uv",
+    "cooler",
+    "dosator",
+    "ph_controller",
+    "ph_meter",
+    "co2",
+    "thermometer",
+    "generic"
+  ]
+
+  availableVendors = [
+    "eheim",
+    "juwel",
+    "dennerle",
+    "aquael",
+    "jbl",
+    "ada",
+    "sera",
+    "tetra",
+    "twinstar",
+    "daytime",
+    "hydor",
+    "oase",
+    "osram",
+    "chihiros",
+    "atman",
+    "sunsun",
+    "jebo",
+    "dehner",
+    "collar",
+    "other"
+  ]
+
   constructor(private navi: NavController,
               private aquabox: AquaBoxService,
+              private tr: TranslatorService,
               private alertController: AlertController,
               private route: ActivatedRoute) {
   }

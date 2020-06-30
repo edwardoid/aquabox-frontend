@@ -29,7 +29,7 @@
                             <img src="{{dev.image()}}">
                         </ion-thumbnail>
                         <ion-text>
-                            <h1>{{dev.name}}: {{dev.value}}°C</h1>
+                            <h1>{{dev.name}}: {{dev.round(1)}}°C</h1>
                         </ion-text>
                         <ion-button class="device_icon" fill="clear" style="float: right;" slot="end" (click)="setupDevice(dev)">
                             <ion-icon name="create" slot="icon-only"></ion-icon>
@@ -48,7 +48,7 @@
                     </ion-thumbnail>
                     <ion-col>
                         <ion-card-title>{{dev.name}}</ion-card-title>
-                        <ion-card-subtitle>{{dev.type}}</ion-card-subtitle>
+                        <ion-card-subtitle>{{tr.deviceType(dev.type)}}</ion-card-subtitle>
                     </ion-col>
                     <ion-toggle (click)="toggleDeviceIfRulesAreDisabled(dev)" [(ngModel)]="dev.isOn" slot="end">
                     </ion-toggle>

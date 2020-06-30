@@ -6,6 +6,7 @@ import { Device } from '../device';
 import { LoadingController, NavController, AlertController } from '@ionic/angular';
 import { Aquabox } from '../aquabox';
 import { ActivatedRoute } from '@angular/router';
+import { TranslatorService } from '../translator.service';
 
 @Component({
   selector: 'app-list',
@@ -21,7 +22,8 @@ export class DevicesPage implements OnInit {
     private route: ActivatedRoute,
     private loadingController: LoadingController,
     public alertController: AlertController,
-    private aquabox: AquaBoxService) {
+  private aquabox: AquaBoxService,
+    private tr: TranslatorService) {
     let boxId = this.route.snapshot.paramMap.get('box');
     this.aquabox.getHosts((hosts: HostsMap) => {
       this.box = hosts.find(boxId);

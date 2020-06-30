@@ -29,6 +29,10 @@ export class Device extends Serializable {
     @SerializeProperty({})
     value: number
 
+    round(precition: number) {
+        return Math.round(Math.pow(10, precition) * this.value) / Math.pow(10, precition); 
+    }
+
     @SerializeProperty({ map: "class"})
     deviceClass: string;
 
