@@ -1,0 +1,30 @@
+<ion-header>
+    <ion-toolbar>
+        <ion-buttons slot="start">
+            <ion-back-button></ion-back-button>
+        </ion-buttons>
+        <ion-title>
+            Available WiFi networks
+        </ion-title>
+    </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="scan($event)">
+    <ion-refresher-content pullingIcon="arrow-dropdown" pullingText="Pull to refresh" refreshingSpinner="circles"
+      refreshingText="Scanning...">
+    </ion-refresher-content>
+  </ion-refresher>
+  <ion-list *ngFor="let net of this?.networks">
+    <ion-item>
+      <ion-col>
+        <h1>{{net.SSID}}</h1>
+        <h2>{{net.security}}</h2>
+      </ion-col>
+
+      <ion-thumbnail slot="end">
+        <img src="/assets/icon/wifi_{{icon(net.signal)}}.svg" />
+      </ion-thumbnail>
+    </ion-item>
+  </ion-list>
+</ion-content>

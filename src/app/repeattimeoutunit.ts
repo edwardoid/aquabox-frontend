@@ -1,5 +1,5 @@
 
-export enum RepeatTimeout{
+export enum RepeatTimeout {
     Minute = "minute",
     Hour = "hour",
     Day = "day",

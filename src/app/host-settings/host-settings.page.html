@@ -4,7 +4,8 @@
       <ion-back-button></ion-back-button>
     </ion-buttons>
     <ion-buttons slot="primary">
-      <ion-button color="secondary" (click)="save()" disabled="{{configuration.host.length == 0 || configuration.name.length == 0}}">
+      <ion-button color="secondary" (click)="save()"
+        disabled="{{configuration.host.length == 0 || configuration.name.length == 0}}">
         <ion-icon slot="start" name="checkmark"></ion-icon>
         Save changes
       </ion-button>
@@ -29,6 +30,9 @@
       <ion-item *ngIf="this.box.connected">
         <ion-label color="primary">Network</ion-label>
         <ion-label>{{box.status.ssid}}</ion-label>
+          <ion-button (click)="selectNetwork()">
+            Select
+          </ion-button>
       </ion-item>
       <ion-item *ngIf="this.box.connected">
         <ion-label color="primary">Mode</ion-label>
@@ -52,14 +56,16 @@
       </ion-item>
       <ion-item>
         <ion-label color="primary" position="stacked">POST port</ion-label>
-        <ion-input placeholder="IP adress of host name" type="number" min="1" max="99999" [(ngModel)]="configuration.rest"></ion-input>
+        <ion-input placeholder="IP adress of host name" type="number" min="1" max="99999"
+          [(ngModel)]="configuration.rest"></ion-input>
       </ion-item>
       <ion-item>
         <ion-label color="primary" position="stacked">Updates port</ion-label>
-        <ion-input placeholder="IP adress of host name" type="number" min="1" max="99999" [(ngModel)]="configuration.stream"></ion-input>
+        <ion-input placeholder="IP adress of host name" type="number" min="1" max="99999"
+          [(ngModel)]="configuration.stream"></ion-input>
       </ion-item>
       <ion-item>
-        <ion-button slot="end" (click)="test()" >
+        <ion-button slot="end" (click)="test()">
           Test
         </ion-button>
       </ion-item>
@@ -73,11 +79,11 @@
           Scan this code with AquaBox App to add the same device on another mobile device
         </ion-label>
         <div style="display: block !important;">
-            <canvas #qrCanvas ></canvas>
+          <canvas #qrCanvas></canvas>
         </div>
-        <ion-button (click)="redrawQR()" >
-            Update QR with modified settings
-          </ion-button>
+        <ion-button (click)="redrawQR()">
+          Update QR with modified settings
+        </ion-button>
       </ion-item>
     </ion-item-group>
     <ion-item-group>
@@ -86,7 +92,7 @@
         <ion-label class="ion-text-center" color="danger" position="stacked" text-wrap>
           <h1>Remove this box(all rules and devices will be kept on box!)</h1>
         </ion-label>
-        <ion-button size="large" color="danger" expand="block" (click)="delete()" >
+        <ion-button size="large" color="danger" expand="block" (click)="delete()">
           <ion-icon name="trash"></ion-icon> DELETE
         </ion-button>
       </ion-item>

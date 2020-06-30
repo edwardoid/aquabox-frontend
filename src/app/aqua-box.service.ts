@@ -11,6 +11,7 @@ import { Device } from './device';
 import { Aquabox, AquaBoxConfiguration } from './aquabox';
 import { $WebSocket } from 'angular2-websocket/angular2-websocket';
 import { BoxStatus } from './box-status';
+import { WiFiInfo } from './wi-fi-info'
 
 @Injectable({
   providedIn: 'root'
@@ -18,13 +19,13 @@ import { BoxStatus } from './box-status';
 export class AquaBoxService {
 
   public hosts: HostsMap = undefined;
-  public ws: Map< string /* url */, WebSocket> = new Map<string, WebSocket>();
+  public ws: Map<string /* url */, WebSocket> = new Map<string, WebSocket>();
 
   public Updates: EventEmitter<UpdateEvent> = new EventEmitter();
 
   constructor(private http: HttpClient,
-              public toastController: ToastController,
-              private storage: Storage) {
+    public toastController: ToastController,
+    private storage: Storage) {
 
     storage.ready().finally(() => {
       this.fetchConfigurations();
@@ -56,16 +57,16 @@ export class AquaBoxService {
         return;
       }
       let hosts = JSON.parse(hostsValue);
-      
+
       if (!Array.isArray(hosts)) {
         this.saveHosts();
         return;
       }
 
-      for(let i in hosts) {
+      for (let i in hosts) {
         if (!hosts[i])
           continue;
-        let cfg : AquaBoxConfiguration = hosts[i]
+        let cfg: AquaBoxConfiguration = hosts[i]
         let box = new Aquabox(this, cfg);
         this.hosts.insert(box);
       }
@@ -77,17 +78,16 @@ export class AquaBoxService {
 
   getHosts(lazy?: (hosts: HostsMap) => void) {
     if (!this.hosts) {
-      try
-      {
-          this.fetchConfigurations(lazy);
+      try {
+        this.fetchConfigurations(lazy);
       }
-      catch(e) {
-        console.log(e); 
+      catch (e) {
+        console.log(e);
       }
     }
-    else if(lazy) {
+    else if (lazy) {
       lazy(this.hosts);
-  }
+    }
 
     return this.hosts;
   }
@@ -98,7 +98,7 @@ export class AquaBoxService {
     event.Class = UpdateEvent.Aquabox;
     event.Sender = box;
     event.Properties = {
-      "connected" : connected
+      "connected": connected
     }
     if (!connected)
       this.ws[url] = undefined;
@@ -186,8 +186,8 @@ export class AquaBoxService {
 
   private async apiError(error: HttpErrorResponse) {
     let err = "Error on making API call " + error.url +
-              "\nFailed with: " + error.statusText +
-              "\nDetails: " + error.message;
+      "\nFailed with: " + error.statusText +
+      "\nDetails: " + error.message;
     console.log(err);
     const toast = await this.toastController.create({
       message: err,
@@ -275,10 +275,10 @@ export class AquaBoxService {
   controlDevice(dev: Device, box: Aquabox, action: ActionType, success?: (result: boolean) => void) {
     this.http.put<Object>(this.baseUrl(box) + "device/" + dev.id + "/" + action, {}).subscribe((response) => {
       dev.deserialize(response);
-      if(success) success(true);
+      if (success) success(true);
     }, (error) => {
       this.apiError(error);
-      if(success) success(false);
+      if (success) success(false);
     });
   }
 
@@ -311,16 +311,16 @@ export class AquaBoxService {
     let data = JSON.stringify(device.serialize());
 
     this.http.post<Object>(url, data)
-             .subscribe((response) => {
-      if(result) {
-        result(true);
-      }
-    }, (error) => {
-      this.apiError(error);
-      if(result) {
-        result(false);
-      }
-    });
+      .subscribe((response) => {
+        if (result) {
+          result(true);
+        }
+      }, (error) => {
+        this.apiError(error);
+        if (result) {
+          result(false);
+        }
+      });
   }
 
   updateRule(box: Aquabox, rule: Rule, update: boolean, result: (result: boolean) => void) {
@@ -330,14 +330,14 @@ export class AquaBoxService {
     let data = JSON.stringify(rule.serialize());
 
     let req = update ? this.http.post<Object>(url, data)
-                     : this.http.put<Object>(url, data);
+      : this.http.put<Object>(url, data);
 
     req.subscribe((response) => {
-      if(result)
+      if (result)
         result(true);
     }, (error) => {
       this.apiError(error);
-      if(result) result(false);
+      if (result) result(false);
     });
   }
 
@@ -354,25 +354,46 @@ export class AquaBoxService {
       });
   }
 
-  getStatus(box: Aquabox, success ?: (result: boolean) => void) {
+  getStatus(box: Aquabox, success?: (result: boolean) => void) {
     let statusUrl = this.baseUrlFromConfiguration(box.configuration) + "status";
     this.http.get<Object>(statusUrl).subscribe((status) => {
       if (!box.status) {
         box.status = new BoxStatus();
       }
       box.status.deserialize(status["aquabox"])
-      if(success) {
+      if (success) {
         success(true);
       }
     },
-    () => { 
-      if(success)
-        success(false);
+      () => {
+        if (success)
+          success(false);
       }
     )
   }
 
-  testConfiguration(configuration: AquaBoxConfiguration, result : (ok: boolean) => void) {
+  getNetworks(box: Aquabox, success?: (result: WiFiInfo[]) => void) {
+    this.http.get<Object>(this.baseUrl(box) + "wifi/scan")
+      .subscribe((response) => {
+        let raw = response["networks"];
+        if (!Array.isArray(raw)) {
+          console.error("Networks are not an array!")
+        }
+
+        let res = [];
+        for (let o of raw) {
+          let net = new WiFiInfo();
+          net.deserialize(o);
+          res.push(net);
+        }
+
+        success(res);
+      }, (error) => {
+        this.apiError(error);
+      });
+  }
+
+  testConfiguration(configuration: AquaBoxConfiguration, result: (ok: boolean) => void) {
     let statusUrl = this.baseUrlFromConfiguration(configuration) + "status";
     this.http.get(statusUrl).subscribe(() => {
       let ws = new $WebSocket(this.wsUrlFromConfiguration(configuration));
@@ -384,7 +405,7 @@ export class AquaBoxService {
         result(false);
       });
     },
-    () => { result(false); }
+      () => { result(false); }
     )
   }
 }

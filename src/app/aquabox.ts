@@ -5,6 +5,7 @@ import { Rule } from './rule';
 import { AquaBoxService } from './aqua-box.service';
 import { Serializable, Serialize } from 'ts-serializer';
 import { UpdateEvent } from './update-event';
+import { WiFiInfo } from './wi-fi-info'
 
 export class AquaBoxConfiguration {
     public id: string = ""
@@ -73,5 +74,9 @@ export class Aquabox extends Serializable{
 
     getStatus(success ?: (result: boolean) => void) {
         this.service.getStatus(this, success);
+    }
+
+    getNetworks(success ?: (result: WiFiInfo[]) => void) {
+        this.service.getNetworks(this, success);
     }
 }

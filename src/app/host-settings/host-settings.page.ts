@@ -50,6 +50,10 @@ export class HostSettingsPage implements OnInit {
   ngAfterViewInit(){
   }
 
+  selectNetwork() {
+    this.navi.navigateForward("/network/" + this.route.snapshot.paramMap.get('box'));
+  }
+
   save() {
     this.aquabox.deleteHost(this.configuration);
     this.aquabox.addHost(this.configuration);
