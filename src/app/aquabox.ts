@@ -50,6 +50,10 @@ export class Aquabox extends Serializable{
         )
     }
 
+    isCloudEnabled() {
+        return this.configuration.host == this.service.APP_SERVER;
+    }
+
     getRules(success: (rules: RulesMap) => void, fail?: () => void) {
         this.service.fetchRules(
             this,

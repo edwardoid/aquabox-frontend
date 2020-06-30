@@ -19,6 +19,7 @@ import { WiFiInfo } from './wi-fi-info'
 export class AquaBoxService {
 
     public APP = "5e0934b3d80b3932ea8cc095";
+    public APP_SERVER = "edwardoid.redirectme.net";
     public hosts: HostsMap = undefined;
     public ws: Map<string /* url */, WebSocket> = new Map<string, WebSocket>();
 
@@ -42,6 +43,7 @@ export class AquaBoxService {
     }
 
     saveHosts() {
+        console.trace();
         let cfgs: AquaBoxConfiguration[] = [];
         for (let host of this.hosts) {
             cfgs.push(host.configuration);
@@ -65,8 +67,9 @@ export class AquaBoxService {
             }
 
             for (let i in hosts) {
-                if (!hosts[i])
+                if (!hosts[i]) {
                     continue;
+                }
                 let cfg: AquaBoxConfiguration = hosts[i]
                 let box = new Aquabox(this, cfg);
                 this.hosts.insert(box);
@@ -123,7 +126,6 @@ export class AquaBoxService {
             event.deserialize(JSON.parse(message.data));
             event.Box = aquabox.id;
             this.Updates.emit(event);
-            this.showMessage(message.data);
         });
         ws.onError(() => {
             this.connected(aquabox.id, key, false);
@@ -134,14 +136,25 @@ export class AquaBoxService {
     }
 
     addHost(configuration: AquaBoxConfiguration) {
-        let box = new Aquabox(this, configuration);
-        box.getDevices((devices: DevicesMap) => {
-            if (devices.isEmpty()) {
-                return;
+        let cloudConfig = configuration;
+        cloudConfig.host = this.APP_SERVER;
+        this.testConfiguration(cloudConfig, (result: boolean) => {
+            if (result) {
+                let box = new Aquabox(this, cloudConfig);
+                this.hosts.insert(box);
+                this.saveHosts();
+            } else {
+                this.testConfiguration(configuration, (result: boolean) => {
+                    if (result) {
+                        let box = new Aquabox(this, configuration);
+                        this.hosts.insert(box);
+                        this.saveHosts();
+                    } else {
+                        this.showMessage("Host is not online");
+                    }
+                });
             }
-            this.hosts.insert(box);
-            this.saveHosts();
-        });
+        })
     }
 
     deleteHost(configuration: AquaBoxConfiguration) {
@@ -180,34 +193,27 @@ export class AquaBoxService {
             'Content-Type' : 'application/json',
             'Accept': 'application/json',
             'boxId': aquabox.configuration.serial,
-            'appId': "5e0934b3d80b3932ea8cc095"
+            'appId': this.APP
         };
     }
 
     private async showMessage(text) {
-        console.log(text);/*
-    const toast = await this.toastController.create({
-      message: text,
-      showCloseButton: true,
-      position: 'top',
-      closeButtonText: 'Done',
-    });
-    toast.present();*/
-    }
-
-    private async apiError(error: HttpErrorResponse) {
-        let err = "Error on making API call " + error.url +
-            "\nFailed with: " + error.statusText +
-            "\nDetails: " + error.message;
-        console.log(err);
+        console.error(text);
         const toast = await this.toastController.create({
-            message: err,
+            message: text,
             showCloseButton: true,
             position: 'top',
             closeButtonText: 'Done',
             duration: 10000
         });
         toast.present();
+    }
+
+    private async apiError(error: HttpErrorResponse) {
+        let err = "Error on making API call " + error.url +
+            "\nFailed with: " + error.statusText +
+            "\nDetails: " + error.message;
+        this.showMessage(err);
     }
 
     private parseDevices(box: Aquabox, respose: Object, success: (devices: DevicesMap) => void) {
@@ -301,8 +307,9 @@ export class AquaBoxService {
                 this.parseRules(box, response, success)
             }, (error) => {
                 this.apiError(error);
-                if (fail)
+                if (fail) {
                     fail();
+                }
             });
     }
 
@@ -312,8 +319,9 @@ export class AquaBoxService {
                 this.parseRules(box, response, success)
             }, (error) => {
                 this.apiError(error);
-                if (fail)
+                if (fail) {
                     fail();
+                }
             });
     }
 
@@ -409,20 +417,14 @@ export class AquaBoxService {
     testConfiguration(configuration: AquaBoxConfiguration, result: (ok: boolean) => void) {
         let statusUrl = this.baseUrlFromConfiguration(configuration) + "status";
 
-        let hdr = { 
-        
-        }
-
         const httpOptions = {
             headers: new HttpHeaders({
                 'Content-Type' : 'application/json',
-        'Accept': 'application/json',
-        'boxId': configuration.serial,
-        'appId': "5e0934b3d80b3932ea8cc095"
+                'Accept': 'application/json',
+                'boxId': configuration.serial,
+                'appId': this.APP_SERVER
             })
-          };
-
-
+        };
 
         this.http.get(statusUrl, httpOptions).subscribe(() => {
             let ws = new $WebSocket(this.wsUrlFromConfiguration(configuration));
