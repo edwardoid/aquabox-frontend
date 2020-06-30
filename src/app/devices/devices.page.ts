@@ -37,6 +37,15 @@ export class DevicesPage implements OnInit {
     this.navi.navigateForward("/rules/" + this.box.configuration.id + "/" + dev.id);
   }
 
+  toggleDevice(dev: Device, event) {
+    if (dev.isOn)
+      dev.turnOff();
+    else
+      dev.turnOn();
+    
+    this.getDevices(event);
+  }
+
   async getDevices(event) {
     const loading = await this.loadingController.create({
       message: "Loading devices...",

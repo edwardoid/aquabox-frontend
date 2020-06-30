@@ -1,3 +1,5 @@
+import { ToastController } from '@ionic/angular';
+import { ActionType } from './actiontype';
 import { DevicesMap, RulesMap, HostsMap } from './id-map';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Storage } from '@ionic/storage';
@@ -5,6 +7,7 @@ import { Rule } from './rule';
 import { Injectable } from '@angular/core';
 import { Device } from './device';
 import { Aquabox, AquaBoxConfiguration } from './aquabox';
+import { $WebSocket } from 'angular2-websocket/angular2-websocket';
 
 @Injectable({
   providedIn: 'root'
@@ -12,8 +15,10 @@ import { Aquabox, AquaBoxConfiguration } from './aquabox';
 export class AquaBoxService {
 
   public hosts: HostsMap = undefined;
+  public ws: Map< string /* url */, WebSocket> = new Map<string, WebSocket>();
 
   constructor(private http: HttpClient,
+              public toastController: ToastController,
               private storage: Storage) {
 
     storage.ready().finally(() => {
@@ -69,9 +74,21 @@ export class AquaBoxService {
     }
     else if(lazy) {
       lazy(this.hosts);
-    }
+  }
 
     return this.hosts;
+  }
+
+  attachForUpdates(aquabox: Aquabox) {
+    let url = "ws://" + aquabox.configuration.host + ":1214/api/" + aquabox.configuration.api + "/updates";
+    if (this.ws[url]) {
+      return;
+    }
+    let ws = new $WebSocket(url);
+    ws.onMessage((message: MessageEvent) => {
+      this.showMessage(message.data);
+    })
+    this.ws[url] = ws;
   }
 
   addHost(configuration: AquaBoxConfiguration) {
@@ -92,10 +109,30 @@ export class AquaBoxService {
     return base;
   }
 
-  private apiError(error: HttpErrorResponse) {
-    console.log("Error on making API call " + error.url +
-      "\nFailed with: " + error.statusText +
-      "\nDetails: " + error.message);
+  private async showMessage(text) {
+    console.log(text);/*
+    const toast = await this.toastController.create({
+      message: text,
+      showCloseButton: true,
+      position: 'top',
+      closeButtonText: 'Done',
+    });
+    toast.present();*/
+  }
+
+  private async apiError(error: HttpErrorResponse) {
+    let err = "Error on making API call " + error.url +
+              "\nFailed with: " + error.statusText +
+              "\nDetails: " + error.message;
+    console.log(err);
+    const toast = await this.toastController.create({
+      message: err,
+      showCloseButton: true,
+      position: 'top',
+      closeButtonText: 'Done',
+      duration: 10000
+    });
+    toast.present();
   }
 
   private parseDevices(box: Aquabox, respose: Object, success: (devices: DevicesMap) => void) {
@@ -148,7 +185,7 @@ export class AquaBoxService {
     success(res);
   }
 
-  fetchDevices(box: Aquabox, success: (devices: DevicesMap) => void, fail?: () => void) {
+  async fetchDevices(box: Aquabox, success: (devices: DevicesMap) => void, fail?: () => void) {
     this.http.get<Object>(this.baseUrl(box) + "devices")
       .subscribe((response) => {
         this.parseDevices(box, response, success)
@@ -157,6 +194,27 @@ export class AquaBoxService {
         if (fail)
           fail();
       });
+  }
+
+  getDevice(device: Device, box: Aquabox, success?: () => void, fail?: () => void) {
+    this.http.get<Object>(this.baseUrl(box) + "device/" + device.id)
+      .subscribe((response) => {
+        device.deserialize(response)
+        if (success) success();
+      }, (error) => {
+        this.apiError(error);
+        if (fail) fail();
+      });
+  }
+
+  controlDevice(dev: Device, box: Aquabox, action: ActionType, success?: (result: boolean) => void) {
+    this.http.put<Object>(this.baseUrl(box) + "device/" + dev.id + "/" + action, {}).subscribe((response) => {
+      dev.deserialize(response);
+      if(success) success(true);
+    }, (error) => {
+      this.apiError(error);
+      if(success) success(false);
+    });
   }
 
   fetchRules(box: Aquabox, success: (rules: RulesMap) => void, fail?: () => void) {

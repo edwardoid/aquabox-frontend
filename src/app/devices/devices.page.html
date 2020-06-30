@@ -32,16 +32,23 @@
                         <ion-label>{{dev.name}}
                             <p>{{dev.type}}</p>
                         </ion-label>
+                        <ion-button>
+                            Disable rules
+                        </ion-button>
+                        <ion-toggle on (click)="toggleDevice(dev, $event)">
+                            Turn on/off
+                        </ion-toggle>
                     </ion-item>
                 </ion-card-header>
 
                 <ion-card-content>
-                    <ion-button fill="clear" style="float: right;" color="danger" (click)='openRules(dev);'>
-                        <ion-icon name="settings"></ion-icon>
+                    <ion-icon name="power" slot="icon-only" color="{{dev.isOn ? 'success' : 'danger'}}" size="large"></ion-icon>
+                    <ion-button  class="device_icon" fill="clear" style="float: right;" color="danger" (click)='openRules(dev);'  size="large">
+                        <ion-icon name="clock" slot="icon-only"></ion-icon>
                     </ion-button>
 
-                    <ion-button fill="clear" style="float: right;">
-                        <ion-icon name="create"></ion-icon>
+                    <ion-button  class="device_icon" fill="clear" style="float: right;"  size="large">
+                        <ion-icon name="create" slot="icon-only"></ion-icon>
                     </ion-button>
                 </ion-card-content>
             </ion-card>

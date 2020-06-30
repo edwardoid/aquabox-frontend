@@ -16,9 +16,6 @@
 <ion-content padding>
   <div style="width: 100%">
     <h1>Device</h1>
-    <ion-select interface="popover" placeholder="Select device">
-      <ion-select-option *ngFor="let dev of devices" value="{{dev.id}}">{{dev.name}}</ion-select-option>
-    </ion-select>
     <h1>Name</h1>
     <ion-input class="nameInput" value="{{rule.name}}" (ionChange)="nameChanged($event)"></ion-input>
     <h1>Please</h1>
@@ -28,8 +25,7 @@
           (click)="action.toggleActionType()">{{action.name()}}</ion-button>
         <ion-text>at</ion-text>
         <ion-button class="no-padding action-button" color="warning">
-          <ion-datetime class="no-padding" displayFormat="HH:mm" placeholder="Select time"
-            value="{{dates[i].toISOString('HH:mm')}}"></ion-datetime>
+          <ion-datetime class="no-padding" displayFormat="HH:mm" placeholder="Select time" [(ngModel)]="dates[i]"></ion-datetime>
         </ion-button>
         <div></div>
         <div style="width: 100%"></div>

@@ -4,7 +4,8 @@ import { Aquabox } from './aquabox';
 import { Device } from './device';
 
 @Serialize({ root : "internals" })
-export class IdMap<T> extends Serializable {   
+export class IdMap<T> extends Serializable {
+
     private internal: Map<string, T> = new Map<string, T>();
 
     public insert(obj: T, replace: boolean = false) {

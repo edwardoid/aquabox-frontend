@@ -29,22 +29,15 @@ export class QRScanningPage implements OnInit {
   }
 
   ngOnDestroy() {
-    this.scanner.stop();this.scanner.stop();
+    this.scanner.stop();
     this.scanning = false;
   }
 
   async scan() {
     this.scanning = true;
-    var self = this;
     this.scanner.scan().then( async (result: string) => {
       this.scanner.stop();
       this.scanning = false;
-      let toast = await self.toastController.create({
-        message: result,
-        duration: 2000
-      });
-
-      //toast.present();
       this.navi.back();
     })
   }

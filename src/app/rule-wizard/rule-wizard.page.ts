@@ -39,7 +39,7 @@ export class RuleWizardPage implements OnInit {
   rule: Rule
   box: Aquabox
   devices: any = []
-  dates: Date[] = []
+  dates: any[] = []
 
   @ViewChild('doneButton') doneButton: IonButton;
 
@@ -100,8 +100,13 @@ export class RuleWizardPage implements OnInit {
     if (this.rule.actions.length != 0 && this.rule.actions[this.rule.actions.length - 1].type == ActionType.TurnOn) {
       type = ActionType.TurnOff;
     }
+
+    var nextDate = new Date(Date.now());
+    if (this.dates.length > 0) {
+      nextDate = new Date(Date.parse(this.dates[this.dates.length - 1]) + 600 * 1000);
+    }
+    this.dates.push(nextDate.toISOString());
     this.rule.actions.push(new Action(type))
-    this.dates.push(new Date());
     this.doneButton.disabled = this.rule.actions.length == 0 || this.rule.name.length == 0;
   }
 
@@ -123,10 +128,10 @@ export class RuleWizardPage implements OnInit {
 
   save() {
     for (let i in this.rule.actions) {
-      this.rule.actions[i].at = this.dates[i].getTime();
+      this.rule.actions[i].at = Date.parse(this.dates[i]);
     }
     if (this.rule.id == "-1") {
-      this.rule.id = (new Date()).getTime().toString();
+      this.rule.id = (new Date()).getUTCDate().toString();
     }
     this.aquabox.getHosts((hosts: HostsMap) => {
       for (let host of hosts.valuesArray()) {

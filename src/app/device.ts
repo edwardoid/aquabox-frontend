@@ -1,3 +1,4 @@
+import { ActionType } from './actiontype';
 import { AquaBoxService } from './aqua-box.service';
 import { Aquabox } from './aquabox';
 import { Serialize, Serializable, SerializeProperty } from 'ts-serializer';
@@ -15,6 +16,9 @@ export class Device extends Serializable {
 
     @SerializeProperty({})
     name: string;
+
+    @SerializeProperty({})
+    isOn: boolean
 
     @SerializeProperty({})
     deviceClass: string;
@@ -44,5 +48,17 @@ export class Device extends Serializable {
 
     rules(success: (rules: RulesMap) => void) {
         this.service.fetchRulesForDevice(this.box, this, success);
+    }
+
+    turnOn(success ?: (ok : boolean) => void) {
+        this.service.controlDevice(this, this.box, ActionType.TurnOn, success);
+    }
+
+    turnOff(success ?: (ok : boolean) => void) {
+        this.service.controlDevice(this, this.box, ActionType.TurnOff, success);
+    }
+
+    update() {
+        this.box.update(this);
     }
 }

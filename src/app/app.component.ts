@@ -37,7 +37,7 @@ export class AppComponent {
       this.aquabox.getHosts((hosts: HostsMap) =>{
         for(let host of hosts.valuesArray()) {
           let data = {
-            "title": host.configuration.hostname,
+            "title": host.configuration.id,
             "url": "/devices/" + host.id,
             "icon": "cube"
           }

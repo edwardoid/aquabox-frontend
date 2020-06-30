@@ -1,4 +1,3 @@
-import { Action } from './../action';
 import { Rule } from './../rule';
 import { HostsMap, RulesMap } from './../id-map';
 import { NavController, AlertController } from '@ionic/angular';

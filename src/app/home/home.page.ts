@@ -1,3 +1,4 @@
+import { Aquabox } from './../aquabox';
 import { HostsMap } from './../id-map';
 import { AquaBoxService } from './../aqua-box.service';
 import { Component } from '@angular/core';
@@ -31,7 +32,7 @@ export class HomePage {
     this.nav.navigateForward("/add-new-host");
   }
 
-  addRule() {
-    this.nav.navigateForward("/rule-wizard")
+  gotoDevice(host: Aquabox) {
+    this.nav.navigateForward("/devices/" + host.id);
   }
 }

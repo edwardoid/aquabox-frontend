@@ -1,5 +1,6 @@
 import { DevicesMap, RulesMap } from './id-map';
 import { Rule } from './rule';
+import { Device } from './device';
 import { AquaBoxService } from './aqua-box.service';
 import { Serializable, Serialize } from 'ts-serializer';
 
@@ -18,15 +19,18 @@ export class Aquabox extends Serializable {
     public id: string
     public devices: DevicesMap = new DevicesMap()
     public rules: RulesMap = new RulesMap()
+    public internal: Object =  new Object()
 
     public constructor(private service: AquaBoxService,
                        public configuration: AquaBoxConfiguration) {
         super();
         this.id = this.configuration.id;
+
+        service.attachForUpdates(this);
     }
 
-    getDevices(success: (devices: DevicesMap) => void, fail?: () => void) {
-        this.service.fetchDevices(
+    async getDevices(success: (devices: DevicesMap) => void, fail?: () => void) {
+        await this.service.fetchDevices(
             this,
             (devices: DevicesMap) => {
                 this.devices = devices;
@@ -34,6 +38,10 @@ export class Aquabox extends Serializable {
             },
             fail
         )
+    }
+
+    update(device: Device) {
+        this.service.getDevice(device, this);
     }
 
     getRules(success: (rules: RulesMap) => void, fail?: () => void) {
