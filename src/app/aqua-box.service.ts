@@ -312,11 +312,14 @@ export class AquaBoxService {
 
     this.http.post<Object>(url, data)
              .subscribe((response) => {
-      if(result)
+      if(result) {
         result(true);
+      }
     }, (error) => {
       this.apiError(error);
-      if(result) result(false);
+      if(result) {
+        result(false);
+      }
     });
   }
 

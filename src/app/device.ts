@@ -42,9 +42,11 @@ export class Device extends Serializable {
     showDetails: false
 
     image() {
-        return this.box.configuration.protocol + "://" +
-               this.box.configuration.host + ":" + this.box.configuration.rest.toString() +
-               "/static/img/logos/" + this.meta["vendor"] + ".png";
+        let v = this.meta["vendor"];
+        if (!v || v == "other") {
+            return "/assets/" + this.type + ".png";    
+        }
+        return "/assets/" + this.meta["vendor"] + ".png";
     }
 
     metaKeys() {

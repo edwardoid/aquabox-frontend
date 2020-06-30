@@ -28,19 +28,21 @@
         <ion-select-option value="light">Light</ion-select-option>
         <ion-select-option value="air_pump">Air pump</ion-select-option>
         <ion-select-option value="water_pump">Water pump</ion-select-option>
-        <ion-select-option value="heater">heaer</ion-select-option>
+        <ion-select-option value="heater">Heater</ion-select-option>
         <ion-select-option value="uv">UV</ion-select-option>
         <ion-select-option value="cooler">Cooler</ion-select-option>
-        <ion-select-option value="fertilizer">Nutriens dosator</ion-select-option>
+        <ion-select-option value="dosator">Nutriens dosator</ion-select-option>
         <ion-select-option value="ph">pH controller</ion-select-option>
-        <ion-select-option value="other">Other</ion-select-option>
+        <ion-select-option value="co2">CO2</ion-select-option>
+        <ion-select-option value="generic">Other</ion-select-option>
       </ion-select>
     </ion-item>
 
     <ion-item>
       <ion-label color="primary" position="stacked">Vendor</ion-label>
-      <ion-select value="other" okText="Okay" cancelText="Cancel" [(ngModel)]="model">
+      <ion-select value="other" okText="Okay" cancelText="Cancel" [(ngModel)]="vendor">
         <ion-select-option value="eheim">Eheim</ion-select-option>
+        <ion-select-option value="juwel">Juwel</ion-select-option>
         <ion-select-option value="dennerle">Dennerle</ion-select-option>
         <ion-select-option value="aquael">Aquael</ion-select-option>
         <ion-select-option value="jbl">JBL</ion-select-option>
@@ -53,11 +55,13 @@
         <ion-select-option value="chihiros">Chihiros</ion-select-option>
         <ion-select-option value="atman">Atman</ion-select-option>
         <ion-select-option value="sunsun">SunSun</ion-select-option>
+        <ion-select-option value="jebo">SunSun</ion-select-option>
+        <ion-select-option value="other">Other</ion-select-option>
       </ion-select>
     </ion-item>
     <ion-item>
       <ion-label color="primary" stacked>Additional</ion-label>
-      <ion-input placeholder="Power, model, etc..." [(ngModel)]="addditional"></ion-input>
+      <ion-input placeholder="Power, model, etc..." [(ngModel)]="model"></ion-input>
     </ion-item>
   </ion-list>
 </ion-content>
