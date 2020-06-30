@@ -3,7 +3,6 @@ import { HostsMap } from './../id-map';
 import { AquaBoxService } from './../aqua-box.service';
 import { Component } from '@angular/core';
 import { NavController } from '@ionic/angular';
-import { QRScanner, QRScannerStatus } from '@ionic-native/qr-scanner/ngx';
 
 @Component({
   selector: 'app-home',
@@ -21,18 +20,12 @@ export class HomePage {
   ngOnInit() {
   }
   
-  gotoDevices() {
-    this.aquabox.getHosts((hosts: HostsMap) => {
-      for (var k of hosts.idsArray()) {
-        this.nav.navigateForward("/devices/" + k);
-      }
-    });
-  }
   addNewDevice() {
     this.nav.navigateForward("/add-new-host");
   }
 
   gotoDevice(host: Aquabox) {
-    this.nav.navigateForward("/devices/" + host.id);
+    if (host.connected)
+      this.nav.navigateForward("/devices/" + host.id);
   }
 }

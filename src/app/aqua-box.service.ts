@@ -293,7 +293,7 @@ export class AquaBoxService {
         result(true);
     }, (error) => {
       this.apiError(error);
-      result(false);
+      if(result) result(false);
     });
   }
 

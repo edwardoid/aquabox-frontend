@@ -10,20 +10,41 @@
 </ion-header>
 
 <ion-content>
-    <ion-list *ngFor="let host of aquabox.hosts">
-        <ion-card (click)="gotoDevice(host)" >
-            <ion-card-header>
-              <ion-thumbnail>
-                <img src="assets/icon/package{{host.connected ? '' : '-grayscale'}}.png"/>
-              </ion-thumbnail>
-            </ion-card-header>
-            <ion-card-content>
-                <h1>{{host.configuration.id}}</h1>
-            </ion-card-content>
-        </ion-card>
-    </ion-list>
+  <ion-list *ngFor="let host of aquabox.hosts">
+    <ion-card (click)="gotoDevice(host)">
+      <ion-card-header>
+        <ion-row justify-content-start>
+          <ion-col size="2">
+            <ion-thumbnail>
+              <img src="assets/icon/package{{host.connected ? '' : '-grayscale'}}.png" />
+            </ion-thumbnail>
+          </ion-col>
+          <ion-col align-self-center align-self-stretch>
+            <ion-label>
+              <h1>{{host.configuration.id}}</h1>
+            </ion-label>
+          </ion-col>
+        </ion-row>
+      </ion-card-header>
+    </ion-card>
+  </ion-list>
 
-    <ion-button (click)='addNewDevice();'>
-      Scan
-    </ion-button>
+  <div class="col col-50 padding-vertical padding-horisontal" *ngIf="!aquabox.hosts.isEmpty()"></div>
+
+  <ion-card (click)='addNewDevice();'>
+    <ion-card-header>
+      <ion-row justify-content-start>
+        <ion-col size="2">
+          <ion-thumbnail>
+            <img src="assets/icon/add_package.png" />
+          </ion-thumbnail>
+        </ion-col>
+        <ion-col align-self-center align-self-stretch>
+          <ion-label>
+            <h1>Add new host</h1>
+          </ion-label>
+        </ion-col>
+      </ion-row>
+    </ion-card-header>
+  </ion-card>
 </ion-content>

@@ -82,8 +82,10 @@ export class RulesPage implements OnInit {
   }
 
   toggleEnabled(rule: Rule) {
-    rule.enabled = !rule.enabled;
+    let curr = rule.enabled;
+    rule.enabled = !curr;
     rule.update();
+    rule.enabled = curr;
   }
 
   addNewRule() {

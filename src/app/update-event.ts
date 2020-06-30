@@ -29,12 +29,19 @@ export class UpdateEvent  extends Serializable {
     }
 
     applyOnObject(source: Serializable, properties: object) {
-        if (source instanceof Aquabox) {
-            if (properties["connected"]) {
-                source["connected"] = properties["connected"];
+        for (let p in properties) {
+            if (!source._serializeMap) {
+                source[p] = properties[p];
+            }
+            else if (source._serializeMap.hasOwnProperty(p)) {
+                if(source._serializeMap[p].hasOwnProperty("type"))
+                    continue;
+                if(source._serializeMap[p].hasOwnProperty("list") && source._serializeMap[p]["list"])
+                    continue;
+                
+                source[p] = properties[p];
             }
         }
-        source.deserialize(properties);
     }
     
 }
