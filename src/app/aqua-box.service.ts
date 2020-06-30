@@ -105,7 +105,7 @@ export class AquaBoxService {
   }
 
   attachForUpdates(aquabox: Aquabox) {
-    let url = "ws://" + aquabox.configuration.host + ":" + aquabox.configuration.stream.toString() + "/api/" + aquabox.configuration.api + "/updates";
+    let url = this.wsUrl(aquabox);
     let key = "ws_" + (new Md5()).appendStr(url).end().toString();
     if (this.ws[key]) {
       return;
@@ -141,11 +141,34 @@ export class AquaBoxService {
     });
   }
 
-  private baseUrl(aquabox: Aquabox) {
-    let base = aquabox.configuration.protocol + "://"
-      + aquabox.configuration.host + ":" + aquabox.configuration.rest.toString()
-      + "/api/" + aquabox.configuration.api + "/";
+  deleteHost(configuration: AquaBoxConfiguration) {
+    this.hosts.removeById(configuration.id);
+    let url = this.wsUrlFromConfiguration(configuration);
+    let key = "ws_" + (new Md5()).appendStr(url).end().toString();
+    if (this.ws[key]) {
+      this.ws[key].close();
+      this.ws[key] = undefined;
+    }
+    this.saveHosts();
+  }
+
+  private wsUrlFromConfiguration(configuration: AquaBoxConfiguration) {
+    return "ws://" + configuration.host + ":" + configuration.stream.toString() + "/api/" + configuration.api + "/updates";
+  }
+
+  private wsUrl(aquabox: Aquabox) {
+    return this.wsUrlFromConfiguration(aquabox.configuration)
+  }
+
+  private baseUrlFromConfiguration(configuration: AquaBoxConfiguration) {
+    let base = configuration.protocol + "://"
+      + configuration.host + ":" + configuration.rest.toString()
+      + "/api/" + configuration.api + "/";
     return base;
+  }
+
+  private baseUrl(aquabox: Aquabox) {
+    return this.baseUrlFromConfiguration(aquabox.configuration);
   }
 
   private async showMessage(text) {
@@ -324,5 +347,21 @@ export class AquaBoxService {
         this.apiError(error);
         result(false);
       });
+  }
+
+  testConfiguration(configuration: AquaBoxConfiguration, result : (ok: boolean) => void) {
+    let statusUrl = this.baseUrlFromConfiguration(configuration) + "status";
+    this.http.get(statusUrl).subscribe(() => {
+      let ws = new $WebSocket(this.wsUrlFromConfiguration(configuration));
+      ws.onOpen(() => {
+        ws.close();
+        result(true)
+      });
+      ws.onError(() => {
+        result(false);
+      });
+    },
+    () => { result(false); }
+    )
   }
 }

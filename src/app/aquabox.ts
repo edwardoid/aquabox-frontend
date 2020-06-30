@@ -8,12 +8,13 @@ import { UpdateEvent } from './update-event';
 
 export class AquaBoxConfiguration {
     public id: string = ""
-    public hostname: string = ""
+    public name: string = ""
     public host: string = ""
     public rest: number
-    public stream: number;
+    public stream: number
     public protocol: string = "http"
     public api: string = "v1"
+    public startedAt: number
 }
 
 @Serialize({ root: "configuration"})

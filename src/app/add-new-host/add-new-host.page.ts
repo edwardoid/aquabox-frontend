@@ -49,7 +49,8 @@ export class AddNewHostPage implements OnInit {
     if (this.configuration === undefined) {
       return;
     }
-    this.configuration.id = this.name
+    this.configuration.id = Date.now().toString();
+    this.configuration.name = this.name;
     this.aquabox.addHost(this.configuration);
     this.configuration = undefined;
     this.nav.navigateRoot("/home");
@@ -83,11 +84,11 @@ export class AddNewHostPage implements OnInit {
           this.configuration = cfg;
           this.configuration.api = "v1";
           this.configuration.protocol = "http";
-          this.configuration.hostname = cfg.host;
+          this.configuration.name = cfg.host;
           this.configuration.host = cfg.host;
           
           for (let h of this.aquabox.hosts) {
-            if (h.configuration.host == this.configuration.hostname) {
+            if (h.configuration.host == this.configuration.host) {
               return false;
             }
           }

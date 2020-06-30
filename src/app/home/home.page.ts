@@ -28,4 +28,8 @@ export class HomePage {
     if (host.connected)
       this.nav.navigateForward("/devices/" + host.id);
   }
+
+  openSettings(host: Aquabox) {
+    this.nav.navigateForward("/settings/" + host.id);
+  }
 }
