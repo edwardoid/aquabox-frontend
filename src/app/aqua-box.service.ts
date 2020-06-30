@@ -6,7 +6,7 @@ import { DevicesMap, RulesMap, HostsMap } from './id-map';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Storage } from '@ionic/storage';
 import { Rule } from './rule';
-import { Injectable, EventEmitter } from '@angular/core';
+import { Injectable, EventEmitter, Self } from '@angular/core';
 import { Device } from './device';
 import { Aquabox, AquaBoxConfiguration } from './aquabox';
 import { $WebSocket } from 'angular2-websocket/angular2-websocket';
@@ -28,6 +28,14 @@ export class AquaBoxService {
     storage.ready().finally(() => {
       this.fetchConfigurations();
     })
+
+    let self = this;
+    setInterval(() => {
+      for (let host of this.hosts) {
+        if (!host.connected)
+          self.attachForUpdates(host);
+      }
+    }, 3000);
   }
 
   saveHosts() {
@@ -83,6 +91,19 @@ export class AquaBoxService {
     return this.hosts;
   }
 
+  connected(box: string, url: string, connected: boolean) {
+    let event = new UpdateEvent();
+    event.Box = box;
+    event.Class =event.Aquabox;
+    event.Sender = box;
+    event.Properties = {
+      "connected" : connected
+    }
+    if (!connected)
+      this.ws[url] = undefined;
+    this.Updates.emit(event);
+  }
+
   attachForUpdates(aquabox: Aquabox) {
     let url = "ws://" + aquabox.configuration.host + ":" + aquabox.configuration.stream.toString() + "/api/" + aquabox.configuration.api + "/updates";
     let key = "ws_" + (new Md5()).appendStr(url).end().toString();
@@ -90,14 +111,23 @@ export class AquaBoxService {
       return;
     }
     let ws = new $WebSocket(url);
+    ws.onOpen(() => {
+      this.ws[key] = ws;
+      this.connected(aquabox.id, key, true);
+    });
     ws.onMessage((message: MessageEvent) => {
       let event = new UpdateEvent();
       event.deserialize(JSON.parse(message.data));
       event.Box = aquabox.id;
       this.Updates.emit(event);
       this.showMessage(message.data);
-    })
-    this.ws[key] = ws;
+    });
+    ws.onError(() => {
+      this.connected(aquabox.id, key, false);
+    });
+    ws.onClose(() => {
+      this.connected(aquabox.id, key, false);
+    });
   }
 
   addHost(configuration: AquaBoxConfiguration) {

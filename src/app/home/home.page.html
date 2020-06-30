@@ -14,7 +14,7 @@
         <ion-card (click)="gotoDevice(host)" >
             <ion-card-header>
               <ion-thumbnail>
-                <img src="assets/icon/package.png"/>
+                <img src="assets/icon/package{{host.connected ? '' : '-grayscale'}}.png"/>
               </ion-thumbnail>
             </ion-card-header>
             <ion-card-content>

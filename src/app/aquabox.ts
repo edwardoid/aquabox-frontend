@@ -3,6 +3,7 @@ import { Rule } from './rule';
 import { Device } from './device';
 import { AquaBoxService } from './aqua-box.service';
 import { Serializable, Serialize } from 'ts-serializer';
+import { UpdateEvent } from './update-event';
 
 export class AquaBoxConfiguration {
     public id: string = ""
@@ -21,13 +22,27 @@ export class Aquabox extends Serializable {
     public devices: DevicesMap = new DevicesMap()
     public rules: RulesMap = new RulesMap()
     public internal: Object =  new Object()
+    public connected: boolean
 
     public constructor(private service: AquaBoxService,
                        public configuration: AquaBoxConfiguration) {
         super();
         this.id = this.configuration.id;
-
-        service.attachForUpdates(this);
+    
+        this.service.Updates.subscribe((event: UpdateEvent) => {
+            if (event.Box != this.id) {
+              return;
+            }
+            if (event.Class != event.Aquabox) {
+              return;
+            }
+      
+            if (this.id != event.Sender) {
+              return;
+            }
+      
+            event.apply(this);
+          });
     }
 
     async getDevices(success: (devices: DevicesMap) => void, fail?: () => void) {

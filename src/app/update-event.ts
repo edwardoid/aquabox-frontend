@@ -4,6 +4,7 @@ import { Serialize, SerializeProperty, Serializable } from 'ts-serializer';
 @Serialize({})
 export class UpdateEvent  extends Serializable {
     
+    Aquabox: string = "aquabox"
     Device: string = "device"
     Rule: string = "rule"
 
