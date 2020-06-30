@@ -56,20 +56,15 @@ export class AquaBoxService {
         await this.storage.get("hosts").then((hostsValue) => {
             this.hosts = new HostsMap();
             if (hostsValue == undefined) {
-                this.saveHosts();
                 return;
             }
             let hosts = JSON.parse(hostsValue);
 
             if (!Array.isArray(hosts)) {
-                this.saveHosts();
                 return;
             }
 
             for (let i in hosts) {
-                if (!hosts[i]) {
-                    continue;
-                }
                 let cfg: AquaBoxConfiguration = hosts[i]
                 let box = new Aquabox(this, cfg);
                 this.hosts.insert(box);
@@ -104,8 +99,9 @@ export class AquaBoxService {
         event.Properties = {
             "connected": connected
         }
-        if (!connected)
+        if (!connected) {
             this.ws[url] = undefined;
+        }
         this.Updates.emit(event);
     }
 
