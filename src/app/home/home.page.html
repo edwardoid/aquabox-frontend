@@ -1,0 +1,24 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>
+      Home
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+    <ion-button (click)='addNewDevice();'>
+      Scan
+    </ion-button>
+
+    <ion-button (click)='gotoDevices()'>
+      Goto to devices
+    </ion-button>
+
+    <ion-text>
+        {{errorString}}
+    </ion-text>
+</ion-content>

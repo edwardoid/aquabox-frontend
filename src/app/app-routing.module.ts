@@ -1,0 +1,36 @@
+import { NgModule } from '@angular/core';
+import { Routes, RouterModule } from '@angular/router';
+
+const routes: Routes = [
+  {
+    path: '',
+    redirectTo: 'home',
+    pathMatch: 'full'
+  },
+  {
+    path: 'home',
+    loadChildren: './home/home.module#HomePageModule'
+  },
+  {
+    path: 'list',
+    loadChildren: './list/list.module#ListPageModule'
+  },
+  {
+    path: 'devices/:box',
+    loadChildren: './devices/devices.module#DevicesPageModule'
+  },
+  {
+    path: 'rules/:box/:dev',
+    loadChildren: './rules/rules.module#RulesPageModule'
+  },
+  {
+    path: 'qrscanning',
+    loadChildren: './qrscanning/qrscanning.module#QRScanningPageModule'
+  }
+];
+
+@NgModule({
+  imports: [RouterModule.forRoot(routes)],
+  exports: [RouterModule]
+})
+export class AppRoutingModule {}

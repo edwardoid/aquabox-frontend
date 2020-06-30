@@ -1,0 +1,50 @@
+<ion-header>
+    <ion-toolbar>
+        <ion-buttons slot="start">
+            <ion-menu-button></ion-menu-button>
+        </ion-buttons>
+        <ion-title>
+            Devices
+        </ion-title>
+    </ion-toolbar>
+</ion-header>
+
+<ion-content>
+    <ion-refresher slot="fixed" (ionRefresh)="getDevices($event)">
+        <ion-refresher-content pullingIcon="arrow-dropdown" pullingText="Pull to refresh" refreshingSpinner="circles"
+            refreshingText="Refreshing...">
+        </ion-refresher-content>
+    </ion-refresher>
+
+        <ion-item>
+        <ion-label>
+            Available devices
+        </ion-label>
+    </ion-item>
+        <ion-list *ngFor="let dev of devices">
+
+            <ion-card color="light">
+                <ion-card-header>
+                    <ion-item color="light">
+                        <ion-thumbnail slot="start">
+                            <img src="{{dev.image()}}">
+                        </ion-thumbnail>
+                        <ion-label>{{dev.name}}
+                            <p>{{dev.type}}</p>
+                        </ion-label>
+                    </ion-item>
+                </ion-card-header>
+
+                <ion-card-content>
+                    <ion-button fill="clear" style="float: right;" color="danger" (click)='openRules(dev);'>
+                        <ion-icon name="settings"></ion-icon>
+                    </ion-button>
+
+                    <ion-button fill="clear" style="float: right;">
+                        <ion-icon name="create"></ion-icon>
+                    </ion-button>
+                </ion-card-content>
+            </ion-card>
+        </ion-list>
+
+</ion-content>
