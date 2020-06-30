@@ -11,29 +11,32 @@
 
 <ion-content>
     <ion-refresher slot="fixed" (ionRefresh)="getDevices($event)">
-        <ion-refresher-content pullingIcon="arrow-dropdown" pullingText="Pull to refresh" refreshingSpinner="circles"
-            refreshingText="Refreshing...">
+        <ion-refresher-content pullingIcon="arrow-dropdown" pullingText="Pull to refresh" refreshingSpinner="circles" refreshingText="Refreshing...">
         </ion-refresher-content>
     </ion-refresher>
 
-    <ion-item>
-        <ion-label>
-            Available devices
-        </ion-label>
-    </ion-item>
-    <ion-card color="light" >
+    <ion-card color="light">
         <ion-card-header>
-            <ion-label>
-                <p>Sensors</p>
-            </ion-label>
+            <ion-card-title>
+                <h1>Sensors</h1>
+            </ion-card-title>
         </ion-card-header>
         <ion-card-content>
-            <ion-list *ngFor="let dev of this?.devices">
-                <ion-item id="sensor{{dev.id}}" color="light" *ngIf="dev.deviceClass == 'sensor'">
-                    <p>{{dev.name}}</p>
-                    <p>{{dev.value}}</p>
-                </ion-item>
-            </ion-list>
+            <div *ngFor="let dev of this?.devices">
+                <ion-row id="sensor{{dev.id}}" color="light" *ngIf="dev.deviceClass == 'sensor'">
+                    <ion-item-divider color="light">
+                        <ion-thumbnail slot="start">
+                            <img src="{{dev.image()}}">
+                        </ion-thumbnail>
+                        <ion-text>
+                            <h1>{{dev.name}}: {{dev.value}}°C</h1>
+                        </ion-text>
+                        <ion-button class="device_icon" fill="clear" style="float: right;" slot="end" (click)="setupDevice(dev)">
+                            <ion-icon name="create" slot="icon-only"></ion-icon>
+                        </ion-button>
+                    </ion-item-divider>
+                </ion-row>
+            </div>
         </ion-card-content>
     </ion-card>
     <ion-list *ngFor="let dev of this?.devices">
@@ -43,14 +46,11 @@
                     <ion-thumbnail slot="start">
                         <img src="{{dev.image()}}">
                     </ion-thumbnail>
-                    <ion-label>{{dev.name}}
-                        <p>{{dev.type}}</p>
-                    </ion-label>
-                    <ion-button fill="clear">
-                        <ion-icon src="/assets/icon/rules_off.svg" slot="icon-only" color="success" size="large">
-                        </ion-icon>
-                    </ion-button>
-                    <ion-toggle on (click)="toggleDeviceIfRulesAreDisabled(dev)" [(ngModel)]="dev.isOn">
+                    <ion-col>
+                        <ion-card-title>{{dev.name}}</ion-card-title>
+                        <ion-card-subtitle>{{dev.type}}</ion-card-subtitle>
+                    </ion-col>
+                    <ion-toggle (click)="toggleDeviceIfRulesAreDisabled(dev)" [(ngModel)]="dev.isOn" slot="end">
                     </ion-toggle>
                 </ion-item>
             </ion-card-header>
@@ -62,10 +62,11 @@
                     <ion-icon name="clock" slot="icon-only"></ion-icon>
                 </ion-button>
 
-                <ion-button class="device_icon" fill="clear" style="float: right;" (click)="setupDevice(dev)" >
+                <ion-button class="device_icon" fill="clear" style="float: right;" (click)="setupDevice(dev)">
                     <ion-icon name="create" slot="icon-only"></ion-icon>
                 </ion-button>
-                <ion-button *ngIf="!dev.rulesEnabled"  (click)="enableRulesOn(dev)"   class="device_icon" fill="outline" style="float: right;" size="small">
+                <ion-button *ngIf="!dev.rulesEnabled" (click)="enableRulesOn(dev)" class="device_icon" fill="outline" style="float: right;"
+                    size="small">
                     Enable rules
                 </ion-button>
             </ion-card-content>
