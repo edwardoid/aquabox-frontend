@@ -35,10 +35,10 @@ export class AppComponent {
       this.splashScreen.hide();
 
       this.aquabox.getHosts((hosts: HostsMap) =>{
-        for(let host of hosts.valuesArray()) {
+        for(let host in hosts.internal) {
           let data = {
-            "title": host.configuration.id,
-            "url": "/devices/" + host.id,
+            "title": hosts.find(host).configuration.id,
+            "url": "/devices/" + hosts.find(host).id,
             "icon": "cube"
           }
           this.appPages.push(data);

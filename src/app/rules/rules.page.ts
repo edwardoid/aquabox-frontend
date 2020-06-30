@@ -1,3 +1,4 @@
+import { UpdateEvent } from './../update-event';
 import { Rule } from './../rule';
 import { HostsMap, RulesMap } from './../id-map';
 import { NavController, AlertController } from '@ionic/angular';
@@ -33,7 +34,7 @@ export class RulesPage implements OnInit {
   private box: Aquabox;
   public device: Device
 
-  public rules: Rule[]
+  public rules: RulesMap;
 
   constructor(private navi: NavController,
               private aquabox: AquaBoxService,
@@ -53,15 +54,41 @@ export class RulesPage implements OnInit {
           self.navi.navigateRoot("/home");
         else
           self.device.rules((rules: RulesMap) => {
-            self.rules = [];
-            for (let rule of rules.valuesArray()) {
-              self.rules.push(rule);
-            }
+            self.rules = rules;
           });
       } else {
         self.navi.navigateRoot("/home");
       }
     });
+
+    this.aquabox.Updates.subscribe((event: UpdateEvent) => {
+      if (event.Box != boxId) {
+        return;
+      }
+      if (event.Class != event.Rule) {
+        return;
+      }
+
+      if (event.Data["action"] == "deleted") {
+        self.rules.removeById(event.Sender);
+      }
+      else if (event.Data["action"] == "created") {
+        let r = new Rule(self.box);
+        r.deserialize(event.Properties["*"]);
+        self.rules.insert(r, true)
+      } if (event.Data["action"] == "updated") {
+        let r = new Rule(self.box);
+        r.deserialize(event.Properties["*"]);
+        if (self.rules.find(event.Sender).enabled != r.enabled) {
+          self.rules.insert(r, true);
+        }
+      }
+    });
+  }
+
+  toggleEnabled(rule: Rule) {
+    rule.enabled = !rule.enabled;
+    rule.update();
   }
 
   addNewRule() {
@@ -84,7 +111,7 @@ export class RulesPage implements OnInit {
           handler: () => {
             rule.delete((result: boolean) => {
               if (result)
-                self.rules.splice(self.rules.indexOf(rule), 1);
+                self.rules.removeById(rule.id);
             });
           }
         }

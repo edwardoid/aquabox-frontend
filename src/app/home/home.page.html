@@ -10,7 +10,7 @@
 </ion-header>
 
 <ion-content>
-    <ion-list *ngFor="let host of aquabox.hosts.valuesArray()">
+    <ion-list *ngFor="let host of aquabox.hosts">
         <ion-card (click)="gotoDevice(host)" >
             <ion-card-header>
               <ion-thumbnail>
@@ -26,12 +26,4 @@
     <ion-button (click)='addNewDevice();'>
       Scan
     </ion-button>
-
-    <ion-button (click)='addRule()'>
-        Add new Rule
-      </ion-button>
-
-    <ion-text>
-        {{errorString}}
-    </ion-text>
 </ion-content>

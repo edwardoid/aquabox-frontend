@@ -4,7 +4,7 @@ import { Serialize, SerializeProperty, Serializable } from 'ts-serializer';
 @Serialize({})
 export class Repeat  extends Serializable  {
     @SerializeProperty({})
-    unit: RepeatTimeout = RepeatTimeout.Day;
+    unit: RepeatTimeout = RepeatTimeout.Hour;
 
     @SerializeProperty({})
     count: number = 0;

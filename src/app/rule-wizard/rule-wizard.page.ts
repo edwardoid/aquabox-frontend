@@ -59,7 +59,7 @@ export class RuleWizardPage implements OnInit {
         }
 
         this.box.getDevices((devices: DevicesMap) => {
-          for(let dev of devices.valuesArray()) {
+          for(let dev of devices) {
             this.devices.push({ 
               id: dev.id,
               name: dev.name
@@ -131,10 +131,16 @@ export class RuleWizardPage implements OnInit {
       this.rule.actions[i].at = Date.parse(this.dates[i]);
     }
     if (this.rule.id == "-1") {
-      this.rule.id = (new Date()).getUTCDate().toString();
+      let id = this.rule.name + "_" + Math.floor(Math.random() * 1000000000000);
+      let forbiddenSymbols = [ "/", " ", ".", "\\", "\t" ];
+      for(let i of forbiddenSymbols) {
+        id = id.replace(forbiddenSymbols[i], "_");
+      }
+
+      this.rule.id = id;
     }
     this.aquabox.getHosts((hosts: HostsMap) => {
-      for (let host of hosts.valuesArray()) {
+      for (let host of hosts) {
         this.rule.save((result: boolean) => {
           if (result)
             this.navi.navigateBack("/rules/" + this.box.id + "/" + this.rule.device);

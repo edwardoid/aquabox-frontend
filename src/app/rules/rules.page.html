@@ -18,7 +18,7 @@
             <h1>{{rule.name}}</h1>
           </ion-label>
           <div style="float: right;">
-            <ion-toggle slot="start" style="vertical-align: middle;" color="success" checked="{{rule.enabled}}">
+            <ion-toggle slot="start" style="vertical-align: middle;" color="success" checked="{{rule.enabled}}" (click)="toggleEnabled(rule)" >
             </ion-toggle>
             <ion-button slot="end" fill="clear" style="vertical-align: middle;" color="danger"
               (click)="removeRule(rule)">

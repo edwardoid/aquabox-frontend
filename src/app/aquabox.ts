@@ -8,7 +8,8 @@ export class AquaBoxConfiguration {
     public id: string = ""
     public hostname: string = ""
     public host: string = ""
-    public port: number
+    public rest: number
+    public stream: number;
     public protocol: string = "http"
     public api: string = "v1"
 }

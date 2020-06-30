@@ -34,7 +34,7 @@ export class Device extends Serializable {
 
     image() {
         return this.box.configuration.protocol + "://" +
-               this.box.configuration.host + ":" + this.box.configuration.port.toString() +
+               this.box.configuration.host + ":" + this.box.configuration.rest.toString() +
                "/static/img/logos/" + this.meta["vendor"] + ".png";
     }
 

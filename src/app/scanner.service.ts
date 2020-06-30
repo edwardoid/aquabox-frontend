@@ -83,7 +83,7 @@ export class ScanService {
 
   scan(): Promise<any> {
     if (this.platform.is("desktop")) {
-      this.lastScannedText = '{"aquabox":{"host":"esargsyan-lnb","port":8974},"setupComplete":false,"version":{"build":"548b7e36006bd6d4cdebefd087c52938cc72faaa","major":1,"minor":0,"version":"1.0"},"wifi":{"encryption":"WPA","password":"azazello","ssid":"Sargsyan5"}}';
+      this.lastScannedText = '{ "aquabox": { "host": "esargsyan-lnb", "rest": 8974, "stream": 1214 } }';
       return new Promise<any>((resolve, reject) => {
         if (this.filter(this.lastScannedText))
           resolve(this.lastScannedText);

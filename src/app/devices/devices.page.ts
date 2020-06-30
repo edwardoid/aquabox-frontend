@@ -1,3 +1,4 @@
+import { UpdateEvent } from './../update-event';
 import { HostsMap, DevicesMap } from './../id-map';
 import { AquaBoxService } from './../aqua-box.service';
 import { Component, OnInit } from '@angular/core';
@@ -28,6 +29,21 @@ export class DevicesPage implements OnInit {
       else
         this.navi.navigateRoot("/home");
     });
+
+    this.aquabox.Updates.subscribe((event: UpdateEvent) => {
+      if (event.Box != boxId) {
+        return;
+      }
+      if (event.Class != event.Device) {
+        return;
+      }
+
+      if (!this.devices.contains(event.Sender)) {
+        return;
+      }
+
+      event.apply(this.devices.find(event.Sender))
+    });
   }
 
   ngOnInit() {
@@ -43,7 +59,7 @@ export class DevicesPage implements OnInit {
     else
       dev.turnOn();
     
-    this.getDevices(event);
+    //this.getDevices(event);
   }
 
   async getDevices(event) {

@@ -1,10 +1,12 @@
+import { UpdateEvent } from './update-event';
+import { Md5 } from 'ts-md5/dist/md5';
 import { ToastController } from '@ionic/angular';
 import { ActionType } from './actiontype';
 import { DevicesMap, RulesMap, HostsMap } from './id-map';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Storage } from '@ionic/storage';
 import { Rule } from './rule';
-import { Injectable } from '@angular/core';
+import { Injectable, EventEmitter } from '@angular/core';
 import { Device } from './device';
 import { Aquabox, AquaBoxConfiguration } from './aquabox';
 import { $WebSocket } from 'angular2-websocket/angular2-websocket';
@@ -17,6 +19,8 @@ export class AquaBoxService {
   public hosts: HostsMap = undefined;
   public ws: Map< string /* url */, WebSocket> = new Map<string, WebSocket>();
 
+  public Updates: EventEmitter<UpdateEvent> = new EventEmitter();
+
   constructor(private http: HttpClient,
               public toastController: ToastController,
               private storage: Storage) {
@@ -27,8 +31,8 @@ export class AquaBoxService {
   }
 
   saveHosts() {
-    let cfgs = [];
-    for (let host of this.hosts.valuesArray()) {
+    let cfgs: AquaBoxConfiguration[] = [];
+    for (let host of this.hosts) {
       cfgs.push(host.configuration);
     }
 
@@ -80,15 +84,20 @@ export class AquaBoxService {
   }
 
   attachForUpdates(aquabox: Aquabox) {
-    let url = "ws://" + aquabox.configuration.host + ":1214/api/" + aquabox.configuration.api + "/updates";
-    if (this.ws[url]) {
+    let url = "ws://" + aquabox.configuration.host + ":" + aquabox.configuration.stream.toString() + "/api/" + aquabox.configuration.api + "/updates";
+    let key = "ws_" + (new Md5()).appendStr(url).end().toString();
+    if (this.ws[key]) {
       return;
     }
     let ws = new $WebSocket(url);
     ws.onMessage((message: MessageEvent) => {
+      let event = new UpdateEvent();
+      event.deserialize(JSON.parse(message.data));
+      event.Box = aquabox.id;
+      this.Updates.emit(event);
       this.showMessage(message.data);
     })
-    this.ws[url] = ws;
+    this.ws[key] = ws;
   }
 
   addHost(configuration: AquaBoxConfiguration) {
@@ -104,7 +113,7 @@ export class AquaBoxService {
 
   private baseUrl(aquabox: Aquabox) {
     let base = aquabox.configuration.protocol + "://"
-      + aquabox.configuration.host + ":" + aquabox.configuration.port.toString()
+      + aquabox.configuration.host + ":" + aquabox.configuration.rest.toString()
       + "/api/" + aquabox.configuration.api + "/";
     return base;
   }
@@ -249,7 +258,8 @@ export class AquaBoxService {
                      : this.http.put<Object>(url, data);
 
     req.subscribe((response) => {
-      result(true);
+      if(result)
+        result(true);
     }, (error) => {
       this.apiError(error);
       result(false);

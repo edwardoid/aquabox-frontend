@@ -66,7 +66,6 @@ export class AddNewHostPage implements OnInit {
   }
 
   scan() {
-    var self = this
     this.scanner.scanAndComeBack((text) => {
       try {
         let status: Object = JSON.parse(text);
@@ -76,16 +75,24 @@ export class AddNewHostPage implements OnInit {
         let cfg = status["aquabox"]
         if (cfg != undefined &&
             cfg.host != undefined &&
-            cfg.port != undefined &&
-            cfg.port > 0 &&
+            cfg.rest != undefined &&
+            cfg.rest > 0 &&
+            cfg.stream != undefined &&
+            cfg.stream > 0 &&
             cfg.host.length > 0) {
           this.configuration = cfg;
           this.configuration.api = "v1";
           this.configuration.protocol = "http";
           this.configuration.hostname = cfg.host;
           this.configuration.host = cfg.host;
-          this.slides.lockSwipeToNext
+          
+          for (let h of this.aquabox.hosts) {
+            if (h.configuration.host == this.configuration.hostname) {
+              return false;
+            }
+          }
           this.slides.slideTo(3);
+
           return true;
         }
       } catch (e) {

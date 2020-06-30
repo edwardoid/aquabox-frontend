@@ -4,9 +4,18 @@ import { Aquabox } from './aquabox';
 import { Device } from './device';
 
 @Serialize({ root : "internals" })
-export class IdMap<T> extends Serializable {
+export class IdMap<T> extends Serializable implements Iterable<T> {
+    public internal: Map<string, T> = new Map<string, T>();
 
-    private internal: Map<string, T> = new Map<string, T>();
+
+    [Symbol.iterator](): Iterator<T> {
+        let i = this.internal.values();
+        return {
+            next(value?: any) {
+                return i.next(value);   
+            }
+        }
+    }
 
     public insert(obj: T, replace: boolean = false) {
         if (!replace) {

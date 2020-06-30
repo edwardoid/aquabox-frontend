@@ -9,13 +9,12 @@
         Done
       </ion-button>
     </ion-buttons>
-    <ion-title>New rule</ion-title>
+    <ion-title>New rule for {{rule.device}}</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content padding>
   <div style="width: 100%">
-    <h1>Device</h1>
     <h1>Name</h1>
     <ion-input class="nameInput" value="{{rule.name}}" (ionChange)="nameChanged($event)"></ion-input>
     <h1>Please</h1>
