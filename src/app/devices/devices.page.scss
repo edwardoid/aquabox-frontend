@@ -1,0 +1,39 @@
+
+ion-card-header {
+    background: transparent;
+}
+
+.sensor-card {
+    background: linear-gradient(to bottom, #6441a5 0%, #2a0845 100%);
+}
+
+.sensor-card-title {
+    color: var(--ion-color-light-tint) !important;
+}
+
+.relay-card {
+    background: linear-gradient(to bottom, #d4fc79 0%, #96e6a1 100%);
+}
+
+ion-card-header {
+    background: transparent !important;
+}
+
+ion-card-title {
+    color: #256c07 !important;
+}
+
+ion-card-subtitle {
+    color: #319506 !important;
+}
+
+.bg-white {
+    background-color: #ccff99 !important;
+    border-radius: 0.3rem;
+}
+
+.sensor-card-sub {
+    color: var(--ion-color-dark-tint) !important;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    border-radius: 0.2rem;
+}
