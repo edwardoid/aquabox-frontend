@@ -2,6 +2,7 @@ import { Action } from './action';
 import { AquaBoxService } from './aqua-box.service';
 import { Aquabox } from './aquabox';
 import { Repeat } from './repeat';
+import { Serialize, SerializeProperty, Serializable } from 'ts-serializer';
 
 /*
 {
@@ -28,54 +29,48 @@ import { Repeat } from './repeat';
 }
 */
 
-export class Rule {
+@Serialize({})
+export class Rule extends Serializable {
+
+    @SerializeProperty({})
     id: string = "-1";
+
+    @SerializeProperty({})
+    name: string = "";
+
+    @SerializeProperty({})
     enabled: boolean = true;
+
+    @SerializeProperty({})
     device: string = "";
+
+    @SerializeProperty({})
     index: number = 0;
+
+    @SerializeProperty({})
     lastRun: number = 0;
+
+    @SerializeProperty({ list: true })
     actions: Action[] = [];
+
+    @SerializeProperty({})
     created_at: number = 0;
+    @SerializeProperty({ type: Repeat })
     repeat: Repeat = new Repeat();
 
-    constructor(private service: AquaBoxService) {
+    constructor(private box: Aquabox) {
+        super()
     }
 
-    parse(obj: Object) {
-        this.id = obj["id"];
-        this.enabled = obj["enabled"];
-        this.device = obj["device"];
-        this.index = obj["index"];
-        this.lastRun = obj["lastRun"];
-        this.created_at = obj["createdAt"];
-        this.repeat.parse(obj["repeat"]);
-        this.actions = [];
-        let actions = obj["actions"];
-        if (Array.isArray(actions)) {
-            for (let o of actions) {
-                let a = new Action(undefined);
-                if (a.parse(o))
-                    this.actions.push(a);
-            }
-        }
-        return true;
+    save(success ?: (result: boolean) => void) {
+        this.box.createRule(this, success);
     }
 
-    toJSONString() {
-        return JSON.stringify(this, (key: string, value: any) => {
-            if (key  == "service")
-                return undefined
-            if (key == "repeat")
-                return value.toJSONObject();
-            return value;
-        });
+    update(success ?: (result: boolean) => void) {
+        this.box.updateRule(this, success);
     }
 
-    save(box: Aquabox) {
-        box.createRule(this);
-    }
-
-    update(box: Aquabox) {
-        box.updateRule(this);
+    delete(success ?: (result: boolean) => void) {
+        this.box.deleteRule(this, success);
     }
 }

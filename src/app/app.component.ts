@@ -1,3 +1,4 @@
+import { HostsMap } from './id-map';
 import { AquaBoxConfiguration, Aquabox } from './aquabox';
 import { AquaBoxService } from './aqua-box.service';
 import { Component } from '@angular/core';
@@ -33,11 +34,10 @@ export class AppComponent {
       this.statusBar.styleDefault();
       this.splashScreen.hide();
 
-      this.aquabox.getHosts((hosts: Map<string, Aquabox>) =>{
-        for(let h in hosts) {
-          let host: AquaBoxConfiguration = this.aquabox.hosts[h].configuration;
+      this.aquabox.getHosts((hosts: HostsMap) =>{
+        for(let host of hosts.valuesArray()) {
           let data = {
-            "title": host.hostname,
+            "title": host.configuration.hostname,
             "url": "/devices/" + host.id,
             "icon": "cube"
           }

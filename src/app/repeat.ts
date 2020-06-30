@@ -1,15 +1,16 @@
 import { RepeatTimeout, RepeatTimeoutConverter } from './repeattimeoutunit';
+import { Serialize, SerializeProperty, Serializable } from 'ts-serializer';
 
-export class Repeat {
+@Serialize({})
+export class Repeat  extends Serializable  {
+    @SerializeProperty({})
     unit: RepeatTimeout = RepeatTimeout.Day;
-    count: number = 0;
-    constructor() {
 
-    }
-    parse(obj: Object) {
-        this.count = obj["count"];
-        this.unit = RepeatTimeoutConverter.fromString(obj["unit"]);
-        return this.count != undefined && this.unit !== undefined;
+    @SerializeProperty({})
+    count: number = 0;
+
+    constructor() {
+        super();
     }
 
     toJSONObject() {

@@ -25,8 +25,8 @@ export class AddNewHostPage implements OnInit {
   @ViewChild('doneButton') doneButton: IonButton;
 
   constructor(private nav: NavController,
-    private scanner: ScanService,
-    private aquabox: AquaBoxService) {
+              private scanner: ScanService,
+              private aquabox: AquaBoxService) {
   }
 
   ngOnInit() {
@@ -41,7 +41,7 @@ export class AddNewHostPage implements OnInit {
 
   nameChanged(event: any) {
     this.name = event.target.value;
-    this.ready = this.name.length > 3 && this.configuration != undefined && this.aquabox.hosts.get(this.name) == undefined
+    this.ready = this.name.length > 3 && this.configuration != undefined && !this.aquabox.hosts.contains(this.name)
     this.doneButton.disabled = !this.ready;
   }
 

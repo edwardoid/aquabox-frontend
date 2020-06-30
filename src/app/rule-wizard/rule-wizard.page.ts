@@ -1,17 +1,18 @@
+import { DevicesMap, HostsMap, RulesMap } from './../id-map';
+import { ActivatedRoute } from '@angular/router';
 import { ActionType } from './../actiontype';
-import {
-  Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import {
   trigger,
-  state,
   style,
   transition,
   animate
 } from "@angular/animations"
-import { AlertController } from '@ionic/angular';
+import { AlertController, IonButton, NavController } from '@ionic/angular';
 import { Rule } from '../rule';
 import { AquaBoxService } from '../aqua-box.service';
 import { Action } from '../action';
+import { Aquabox } from '../aquabox';
 
 @Component({
   selector: 'app-rule-wizard',
@@ -36,80 +37,61 @@ import { Action } from '../action';
 export class RuleWizardPage implements OnInit {
 
   rule: Rule
+  box: Aquabox
+  devices: any = []
+  dates: Date[] = []
+
+  @ViewChild('doneButton') doneButton: IonButton;
+
   constructor(public alertController: AlertController,
-    private aquabox: AquaBoxService) {
-    this.rule = new Rule(this.aquabox);
-    this.rule.device = "dev1";
+              private route: ActivatedRoute,
+              private navi: NavController,
+              private aquabox: AquaBoxService) {
+    let boxId = this.route.snapshot.paramMap.get("box");
+    let devId = this.route.snapshot.paramMap.get("dev");
+    let ruleId = this.route.snapshot.paramMap.get("rule");
+
+    this.aquabox.getHosts((hosts: HostsMap) => {
+        this.box = hosts.find(boxId);
+
+        if (!this.box) {
+          navi.navigateRoot("/home");
+        }
+
+        this.box.getDevices((devices: DevicesMap) => {
+          for(let dev of devices.valuesArray()) {
+            this.devices.push({ 
+              id: dev.id,
+              name: dev.name
+            });
+
+            if (ruleId) {
+              this.box.getRules((rules: RulesMap) => {
+                this.rule = rules.find(ruleId);
+              });
+
+              if (!this.rule) {
+                navi.navigateRoot("/home");
+              }
+            }
+            else {
+              this.rule = new Rule(this.box);
+              this.rule.device = devId;
+            }
+          }
+        });
+    });
   }
 
   ngOnInit() {
+    
+    this.doneButton.disabled = this.rule.actions.length == 0 || this.rule.name.length == 0;
+    
   }
 
-  async selectWorkDays() {
-    const alert = await this.alertController.create({
-      header: 'Checkbox',
-      inputs: [
-        {
-          name: 'checkbox1',
-          type: 'checkbox',
-          label: 'Checkbox 1',
-          value: 'value1',
-          checked: true
-        },
-
-        {
-          name: 'checkbox2',
-          type: 'checkbox',
-          label: 'Checkbox 2',
-          value: 'value2'
-        },
-
-        {
-          name: 'checkbox3',
-          type: 'checkbox',
-          label: 'Checkbox 3',
-          value: 'value3'
-        },
-
-        {
-          name: 'checkbox4',
-          type: 'checkbox',
-          label: 'Checkbox 4',
-          value: 'value4'
-        },
-
-        {
-          name: 'checkbox5',
-          type: 'checkbox',
-          label: 'Checkbox 5',
-          value: 'value5'
-        },
-
-        {
-          name: 'checkbox6',
-          type: 'checkbox',
-          label: 'Checkbox 6 Checkbox 6 Checkbox 6 Checkbox 6 Checkbox 6 Checkbox 6 Checkbox 6 Checkbox 6 Checkbox 6 Checkbox 6',
-          value: 'value6'
-        }
-      ],
-      buttons: [
-        {
-          text: 'Cancel',
-          role: 'cancel',
-          cssClass: 'secondary',
-          handler: () => {
-            console.log('Confirm Cancel');
-          }
-        }, {
-          text: 'Ok',
-          handler: () => {
-            console.log('Confirm Ok');
-          }
-        }
-      ]
-    });
-
-    await alert.present();
+  nameChanged(event: any) {
+    this.rule.name = event.target.value;
+    this.doneButton.disabled = this.rule.actions.length == 0 || this.rule.name.length == 0;
   }
 
   addAction() {
@@ -119,22 +101,41 @@ export class RuleWizardPage implements OnInit {
       type = ActionType.TurnOff;
     }
     this.rule.actions.push(new Action(type))
+    this.dates.push(new Date());
+    this.doneButton.disabled = this.rule.actions.length == 0 || this.rule.name.length == 0;
   }
 
   removeAction(act: any) {
-    this.rule.actions.splice(this.rule.actions.indexOf(act), 1);
+    let idx = this.rule.actions.indexOf(act);
+    this.rule.actions.splice(idx, 1);
+    this.dates.splice(idx, 1);
+    this.doneButton.disabled = this.rule.actions.length == 0 || this.rule.name.length == 0;
   }
 
   reorderActions(indexes) {
     let element = this.rule.actions[indexes.from];
     this.rule.actions.splice(indexes.from, 1);
     this.rule.actions.splice(indexes.to, 0, element);
+
+    this.dates.splice(indexes.from, 1);
+    this.dates.splice(indexes.to, 0, indexes.from);
   }
 
   save() {
-    for (let k in this.aquabox.getHosts()) {
-      this.rule.save(this.aquabox.hosts[k]);
-      break;
+    for (let i in this.rule.actions) {
+      this.rule.actions[i].at = this.dates[i].getTime();
     }
+    if (this.rule.id == "-1") {
+      this.rule.id = (new Date()).getTime().toString();
+    }
+    this.aquabox.getHosts((hosts: HostsMap) => {
+      for (let host of hosts.valuesArray()) {
+        this.rule.save((result: boolean) => {
+          if (result)
+            this.navi.navigateBack("/rules/" + this.box.id + "/" + this.rule.device);
+        });
+        return;
+      }
+    });
   }
 }

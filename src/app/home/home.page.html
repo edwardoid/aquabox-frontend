@@ -10,6 +10,19 @@
 </ion-header>
 
 <ion-content>
+    <ion-list *ngFor="let host of aquabox.hosts.valuesArray()">
+        <ion-card>
+            <ion-card-header>
+              <ion-thumbnail>
+                <img src="assets/icon/package.png"/>
+              </ion-thumbnail>
+            </ion-card-header>
+            <ion-card-content>
+                <h1>{{host.configuration.host}}</h1>
+            </ion-card-content>
+        </ion-card>
+    </ion-list>
+
     <ion-button (click)='addNewDevice();'>
       Scan
     </ion-button>

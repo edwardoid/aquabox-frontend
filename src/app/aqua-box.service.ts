@@ -1,17 +1,17 @@
+import { DevicesMap, RulesMap, HostsMap } from './id-map';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Storage } from '@ionic/storage';
 import { Rule } from './rule';
 import { Injectable } from '@angular/core';
 import { Device } from './device';
 import { Aquabox, AquaBoxConfiguration } from './aquabox';
-import { saveConfig } from '@ionic/core';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AquaBoxService {
 
-  public hosts: Map<string, Aquabox> = undefined;
+  public hosts: HostsMap = undefined;
 
   constructor(private http: HttpClient,
               private storage: Storage) {
@@ -23,16 +23,16 @@ export class AquaBoxService {
 
   saveHosts() {
     let cfgs = [];
-    for (let id in this.hosts) {
-      cfgs.push(this.hosts[id].configuration);
+    for (let host of this.hosts.valuesArray()) {
+      cfgs.push(host.configuration);
     }
 
     this.storage.set("hosts", JSON.stringify(cfgs))
   }
 
-  async fetchConfigurations(lazy?: (hosts: Map<string, Aquabox>) => void) {
+  async fetchConfigurations(lazy?: (hosts: HostsMap) => void) {
     await this.storage.get("hosts").then((hostsValue) => {
-      this.hosts = new Map<string, Aquabox>();
+      this.hosts = new HostsMap();
       if (hostsValue == undefined) {
         this.saveHosts();
         return;
@@ -45,9 +45,11 @@ export class AquaBoxService {
       }
 
       for(let i in hosts) {
+        if (!hosts[i])
+          continue;
         let cfg : AquaBoxConfiguration = hosts[i]
         let box = new Aquabox(this, cfg);
-        this.hosts[cfg.id] = box;
+        this.hosts.insert(box);
       }
 
       if (lazy)
@@ -55,7 +57,7 @@ export class AquaBoxService {
     });
   }
 
-  getHosts(lazy?: (hosts: Map<string, Aquabox>) => void) {
+  getHosts(lazy?: (hosts: HostsMap) => void) {
     if (!this.hosts) {
       try
       {
@@ -74,8 +76,13 @@ export class AquaBoxService {
 
   addHost(configuration: AquaBoxConfiguration) {
     let box = new Aquabox(this, configuration);
-    this.hosts[box.configuration.id] = box;
-    this.saveHosts();
+    box.getDevices((devices: DevicesMap) => {
+      if (devices.isEmpty()) {
+        return;
+      }
+      this.hosts.insert(box);
+      this.saveHosts();
+    });
   }
 
   private baseUrl(aquabox: Aquabox) {
@@ -91,7 +98,7 @@ export class AquaBoxService {
       "\nDetails: " + error.message);
   }
 
-  private parseDevices(box: Aquabox, respose: Object, success: (devices: Device[]) => void) {
+  private parseDevices(box: Aquabox, respose: Object, success: (devices: DevicesMap) => void) {
     if (!Response) {
       console.error("Can't get list of devices");
       return;
@@ -106,25 +113,71 @@ export class AquaBoxService {
       console.error("Devices are not an array!")
     }
 
-    let res = [];
+    let res = new DevicesMap;
     for (let o of raw) {
       let d = new Device(this, box);
-      if (d.parse(o)) {
-        res.push(d);
-      }
+      d.deserialize(o);
+      res.insert(d);
     }
 
     success(res);
   }
 
-  fetchDevices(box: Aquabox, success: (devices: Device[]) => void,
-    fail: () => void) {
+  private parseRules(box: Aquabox, response: Object, success: (rules: RulesMap) => void): any {
+    if (!Response) {
+      console.error("Can't get list of rules");
+      return;
+    }
+
+    if (!response.hasOwnProperty("rules")) {
+      console.error("Can't find property rules in response");
+    }
+
+    let raw = response["rules"];
+    if (!Array.isArray(raw)) {
+      console.error("Rules are not an array!")
+    }
+
+    let res = new RulesMap;
+    for (let o of raw) {
+      let r = new Rule(box);
+      r.deserialize(o);
+      res.insert(r);
+    }
+
+    success(res);
+  }
+
+  fetchDevices(box: Aquabox, success: (devices: DevicesMap) => void, fail?: () => void) {
     this.http.get<Object>(this.baseUrl(box) + "devices")
       .subscribe((response) => {
         this.parseDevices(box, response, success)
       }, (error) => {
         this.apiError(error);
-        fail();
+        if (fail)
+          fail();
+      });
+  }
+
+  fetchRules(box: Aquabox, success: (rules: RulesMap) => void, fail?: () => void) {
+    this.http.get<Object>(this.baseUrl(box) + "rules")
+      .subscribe((response) => {
+        this.parseRules(box, response, success)
+      }, (error) => {
+        this.apiError(error);
+        if (fail)
+          fail();
+      });
+  }
+
+  fetchRulesForDevice(box: Aquabox, device: Device, success: (rules: RulesMap) => void, fail?: () => void) {
+    this.http.get<Object>(this.baseUrl(box) + "rules/" + device.id)
+      .subscribe((response) => {
+        this.parseRules(box, response, success)
+      }, (error) => {
+        this.apiError(error);
+        if (fail)
+          fail();
       });
   }
 
@@ -132,7 +185,7 @@ export class AquaBoxService {
 
     let url = this.baseUrl(box) + "device/" + rule.device + "/rule";
 
-    let data = rule.toJSONString();
+    let data = JSON.stringify(rule.serialize());
 
     let req = update ? this.http.post<Object>(url, data)
                      : this.http.put<Object>(url, data);
@@ -143,5 +196,18 @@ export class AquaBoxService {
       this.apiError(error);
       result(false);
     });
+  }
+
+  deleteRule(box: Aquabox, rule: Rule, result: (result: boolean) => void) {
+
+    let url = this.baseUrl(box) + "rule/" + rule.id
+
+    this.http.delete(url)
+      .subscribe(() => {
+        result(true);
+      }, (error) => {
+        this.apiError(error);
+        result(false);
+      });
   }
 }

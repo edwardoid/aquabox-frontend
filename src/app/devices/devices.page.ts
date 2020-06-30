@@ -1,3 +1,4 @@
+import { HostsMap, DevicesMap } from './../id-map';
 import { AquaBoxService } from './../aqua-box.service';
 import { Component, OnInit } from '@angular/core';
 import { Device } from '../device';
@@ -12,21 +13,24 @@ import { ActivatedRoute } from '@angular/router';
 })
 export class DevicesPage implements OnInit {
 
-  devices: Array<Device> = [];
+  devices: DevicesMap;
   box: Aquabox;
   
   constructor(private navi: NavController,
               private route: ActivatedRoute,
               private loadingController: LoadingController,
               private aquabox: AquaBoxService) {
+    let boxId = this.route.snapshot.paramMap.get('box');
+    this.aquabox.getHosts((hosts: HostsMap) => {
+      this.box = hosts.find(boxId);
+      if (this.box)
+        this.getDevices(undefined);
+      else
+        this.navi.navigateRoot("/home");
+    });
   }
 
-  async ngOnInit() {
-    let boxId = this.route.snapshot.paramMap.get('box');
-    this.aquabox.getHosts((hosts: Map<string, Aquabox>) => {
-      this.box = this.aquabox.getHosts()[boxId];
-      this.getDevices(undefined);
-    });
+  ngOnInit() {
   }
 
   openRules(dev: Device) {
@@ -39,11 +43,12 @@ export class DevicesPage implements OnInit {
       duration: 30000
     });
 
+    let self = this;
     await loading.present().then(() => {
 
-      this.box.getDevices(
-        (devices: Device[]) => {
-          this.devices = devices;
+      self.box.getDevices(
+        (devices: DevicesMap) => {
+          self.devices = devices;
           loading.dismiss();
           if (event)
             event.target.complete();

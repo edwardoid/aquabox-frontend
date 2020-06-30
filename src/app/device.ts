@@ -1,27 +1,32 @@
 import { AquaBoxService } from './aqua-box.service';
 import { Aquabox } from './aquabox';
+import { Serialize, Serializable, SerializeProperty } from 'ts-serializer';
+import { RulesMap } from './id-map';
 
-export class Device {
+@Serialize({})
+export class Device extends Serializable {
     
     constructor(private service: AquaBoxService, private box: Aquabox) {
+        super();
     }
 
+    @SerializeProperty({})
     id: string;
+
+    @SerializeProperty({})
     name: string;
+
+    @SerializeProperty({})
     deviceClass: string;
+
+    @SerializeProperty({})
     type: string;
+
+    @SerializeProperty({})
     meta: Map<string, string>;
+
+    @SerializeProperty({})
     showDetails: false
-
-
-    parse(obj: Object) {
-        this.id = obj["id"];
-        this.name = obj["name"];
-        this.type = obj["type"];
-        this.deviceClass = obj["class"];
-        this.meta = obj["meta"];
-        return true;
-    }
 
     image() {
         return this.box.configuration.protocol + "://" +
@@ -35,5 +40,9 @@ export class Device {
 
     metadata(key: string) {
         return this.meta[key]
+    }
+
+    rules(success: (rules: RulesMap) => void) {
+        this.service.fetchRulesForDevice(this.box, this, success);
     }
 }

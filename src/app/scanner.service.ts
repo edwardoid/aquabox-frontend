@@ -2,7 +2,6 @@ import { Platform, NavController } from '@ionic/angular';
 import { Injectable } from '@angular/core';
 import { QRScanner, QRScannerStatus } from '@ionic-native/qr-scanner/ngx';
 
-
 @Injectable({
   providedIn: 'root'
 })

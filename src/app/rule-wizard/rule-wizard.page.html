@@ -3,8 +3,8 @@
     <ion-buttons slot="start">
       <ion-back-button></ion-back-button>
     </ion-buttons>
-    <ion-buttons slot="primary" (click)="save()" >
-      <ion-button color="secondary">
+    <ion-buttons slot="primary">
+      <ion-button color="secondary" (click)="save()" #doneButton>
         <ion-icon slot="start" name="checkmark"></ion-icon>
         Done
       </ion-button>
@@ -15,15 +15,21 @@
 
 <ion-content padding>
   <div style="width: 100%">
-    <h1>Please </h1>
+    <h1>Device</h1>
+    <ion-select interface="popover" placeholder="Select device">
+      <ion-select-option *ngFor="let dev of devices" value="{{dev.id}}">{{dev.name}}</ion-select-option>
+    </ion-select>
+    <h1>Name</h1>
+    <ion-input class="nameInput" value="{{rule.name}}" (ionChange)="nameChanged($event)"></ion-input>
+    <h1>Please</h1>
     <ion-list @listItemState *ngFor="let action of rule.actions; let i = index">
       <ion-item class="no-padding">
-        <ion-button color="{{action.type ? 'danger' : 'success'}}" class="action-button"
+        <ion-button color="{{action.type == 'turn_off' ? 'danger' : 'success'}}" class="action-button"
           (click)="action.toggleActionType()">{{action.name()}}</ion-button>
         <ion-text>at</ion-text>
         <ion-button class="no-padding action-button" color="warning">
           <ion-datetime class="no-padding" displayFormat="HH:mm" placeholder="Select time"
-            value="{{action.at.toISOString('HH:mm')}}"></ion-datetime>
+            value="{{dates[i].toISOString('HH:mm')}}"></ion-datetime>
         </ion-button>
         <div></div>
         <div style="width: 100%"></div>

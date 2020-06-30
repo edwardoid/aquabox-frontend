@@ -8,49 +8,35 @@
     </ion-title>
   </ion-toolbar>
 </ion-header>
-<ion-list *ngFor="let dev of rules">
+<ion-button (click)="addNewRule()">Add new rule</ion-button>
+<ion-list @listItemState *ngFor="let rule of rules">
 
   <ion-card color="light">
     <ion-card-header>
-      <ion-item color="light">
-          <ion-label color="dark">
-          <h1>Daily shit</h1>
+      <ion-item class="titleItem">
+        <ion-label color="dark">
+          <h1>{{rule.name}}</h1>
         </ion-label>
-          <ion-toggle style="float: right;" slot="end"></ion-toggle>
+        <div style="float: right;">
+          <ion-toggle slot="start" style="vertical-align: middle;" color="success" checked="{{rule.enabled}}">
+          </ion-toggle>
+          <ion-button slot="end" fill="clear" style="vertical-align: middle;" color="danger" (click)="removeRule(rule)" >
+            <ion-icon name="trash" slot="icon-only"></ion-icon>
+          </ion-button>
+        </div>
       </ion-item>
     </ion-card-header>
 
     <ion-card-content>
-      <ion-row>
-        <ion-text style="color: #383a3e" align-self-center>
-          <h1>Please </h1>
-        </ion-text>
-        <ion-button size="small" color="success" class="actioinButton">Turn on</ion-button>
-
-        <ion-text style="color: #383a3e" align-self-center>
-          <h1> on </h1>
+      <ion-item class="actionItem"  *ngFor="let action of rule.actions">
+        <ion-text class="{{action.type}}"  align-self-center>
+          <h1>{{action.type == "turn_on" ? "Turn on" : "Turn off"}}</h1>
         </ion-text>
 
-        <ion-button size="small" color="medium" class="actioinButton">$time</ion-button>
-
-        <ion-text style="color: #383a3e" align-self-center>
-          <h1> and </h1>
+        <ion-text class="textWithSpacing" align-self-center>
+          <h1>at {{ action.at | date:'HH:mm' }}</h1>
         </ion-text>
-
-        <ion-button size="small" color="danger" class="actioinButton"> turn off</ion-button>
-
-        <ion-text color="dark" align-self-center>
-          <h1> on </h1>
-        </ion-text>
-
-        <ion-button size="small" color="medium" class="actioinButton">$time</ion-button>
-
-        <ion-text color="dark" align-self-center>
-          <h1> every </h1>
-        </ion-text>
-
-        <ion-button size="small" color="medium" class="actioinButton">$day</ion-button>
-      </ion-row>
+      </ion-item>
     </ion-card-content>
   </ion-card>
 

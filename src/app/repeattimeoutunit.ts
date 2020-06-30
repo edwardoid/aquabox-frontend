@@ -1,10 +1,10 @@
 
 export enum RepeatTimeout{
-    Minute,
-    Hour,
-    Day,
-    Week,
-    Month
+    Minute = "minute",
+    Hour = "hour",
+    Day = "day",
+    Week = "week",
+    Month = "month"
 }
 
 export class RepeatTimeoutConverter {

@@ -1,6 +1,7 @@
+import { DevicesMap, RulesMap } from './id-map';
 import { Rule } from './rule';
 import { AquaBoxService } from './aqua-box.service';
-import { Device } from './device';
+import { Serializable, Serialize } from 'ts-serializer';
 
 export class AquaBoxConfiguration {
     public id: string = ""
@@ -11,19 +12,23 @@ export class AquaBoxConfiguration {
     public api: string = "v1"
 }
 
-export class Aquabox {
+@Serialize({ root: "configuration"})
+export class Aquabox extends Serializable {
 
-    public devices: Device[] = []
-    public rules: Rule[] = []
+    public id: string
+    public devices: DevicesMap = new DevicesMap()
+    public rules: RulesMap = new RulesMap()
 
     public constructor(private service: AquaBoxService,
                        public configuration: AquaBoxConfiguration) {
+        super();
+        this.id = this.configuration.id;
     }
 
-    getDevices(success: (devices: Device[]) => void, fail: () => void) {
+    getDevices(success: (devices: DevicesMap) => void, fail?: () => void) {
         this.service.fetchDevices(
             this,
-            (devices: Device[]) => {
+            (devices: DevicesMap) => {
                 this.devices = devices;
                 success(this.devices);
             },
@@ -31,25 +36,26 @@ export class Aquabox {
         )
     }
 
-    getDevice(id: string) {
-        for (var i in this.devices) {
-            if (this.devices[i].id == id) {
-                return this.devices[i];
-            }
-        }
-
-        return undefined;
+    getRules(success: (rules: RulesMap) => void, fail?: () => void) {
+        this.service.fetchRules(
+            this,
+            (rules: RulesMap) => {
+                this.rules = rules;
+                success(this.rules);
+            },
+            fail
+        )
     }
 
-    updateRule(rule: Rule) {
-        this.service.updateRule(this, rule, true, (result: boolean) => void {
-
-        });
+    updateRule(rule: Rule, success ?: (result: boolean) => void) {
+        this.service.updateRule(this, rule, true, success);
     }
 
-    createRule(rule: Rule) {
-        this.service.updateRule(this, rule, true, (result: boolean) => void {
+    createRule(rule: Rule, success ?: (result: boolean) => void) {
+        this.service.updateRule(this, rule, false, success);
+    }
 
-        });
+    deleteRule(rule: Rule, success ?: (result: boolean) => void) {
+        this.service.deleteRule(this, rule, success);
     }
 }

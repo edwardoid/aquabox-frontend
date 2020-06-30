@@ -1,3 +1,4 @@
+import { HostsMap } from './../id-map';
 import { AquaBoxService } from './../aqua-box.service';
 import { Component } from '@angular/core';
 import { NavController } from '@ionic/angular';
@@ -13,16 +14,18 @@ export class HomePage {
   errorString: string = "Nothing";
 
   constructor(private nav: NavController,
-              private aquabox: AquaBoxService) {
+              public aquabox: AquaBoxService) {
   }
 
   ngOnInit() {
   }
+  
   gotoDevices() {
-    this.aquabox.getHosts()
-    for (let k in this.aquabox.getHosts()) {
-      this.nav.navigateForward("/devices/" + k);
-    }
+    this.aquabox.getHosts((hosts: HostsMap) => {
+      for (var k of hosts.idsArray()) {
+        this.nav.navigateForward("/devices/" + k);
+      }
+    });
   }
   addNewDevice() {
     this.nav.navigateForward("/add-new-host");

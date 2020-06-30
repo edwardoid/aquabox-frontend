@@ -1,6 +1,6 @@
 export enum ActionType {
-    TurnOn,
-    TurnOff
+    TurnOn = "turn_on",
+    TurnOff = "turn_off"
 }
 
 export class ActionTypeConverter {

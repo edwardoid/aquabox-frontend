@@ -28,7 +28,11 @@ const routes: Routes = [
     loadChildren: './qrscanning/qrscanning.module#QRScanningPageModule'
   },
   {
-    path: 'rule-wizard',
+    path: 'rule-wizard/:box/:dev',
+    loadChildren: './rule-wizard/rule-wizard.module#RuleWizardPageModule'
+  },
+  {
+    path: 'rule-wizard/:box/:dev/:rule',
     loadChildren: './rule-wizard/rule-wizard.module#RuleWizardPageModule'
   },
   { path: 'add-new-host', loadChildren: './add-new-host/add-new-host.module#AddNewHostPageModule' }

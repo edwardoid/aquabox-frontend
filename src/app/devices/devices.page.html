@@ -9,7 +9,7 @@
     </ion-toolbar>
 </ion-header>
 
-<ion-content>
+<ion-content *ngIf="devices != undefined">
     <ion-refresher slot="fixed" (ionRefresh)="getDevices($event)">
         <ion-refresher-content pullingIcon="arrow-dropdown" pullingText="Pull to refresh" refreshingSpinner="circles"
             refreshingText="Refreshing...">
@@ -21,7 +21,7 @@
             Available devices
         </ion-label>
     </ion-item>
-        <ion-list *ngFor="let dev of devices">
+        <ion-list *ngFor="let dev of devices.valuesArray()">
 
             <ion-card color="light">
                 <ion-card-header>
