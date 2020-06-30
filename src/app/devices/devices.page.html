@@ -21,8 +21,23 @@
             Available devices
         </ion-label>
     </ion-item>
+    <ion-card color="light" >
+        <ion-card-header>
+            <ion-label>
+                <p>Sensors</p>
+            </ion-label>
+        </ion-card-header>
+        <ion-card-content>
+            <ion-list *ngFor="let dev of this?.devices">
+                <ion-item id="sensor{{dev.id}}" color="light" *ngIf="dev.deviceClass == 'sensor'">
+                    <p>{{dev.name}}</p>
+                    <p>{{dev.value}}</p>
+                </ion-item>
+            </ion-list>
+        </ion-card-content>
+    </ion-card>
     <ion-list *ngFor="let dev of this?.devices">
-        <ion-card id="card{{dev.id}}" color="light">
+        <ion-card id="card{{dev.id}}" color="light" *ngIf="dev.deviceClass == 'relay'">
             <ion-card-header>
                 <ion-item color="light">
                     <ion-thumbnail slot="start">

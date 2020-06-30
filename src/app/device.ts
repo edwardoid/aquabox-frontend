@@ -21,10 +21,13 @@ export class Device extends Serializable {
     index: number;
 
     @SerializeProperty({})
-    pin: number;
+    address: string;
 
     @SerializeProperty({})
     isOn: boolean
+
+    @SerializeProperty({})
+    value: number
 
     @SerializeProperty({ map: "class"})
     deviceClass: string;
