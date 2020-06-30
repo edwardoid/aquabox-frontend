@@ -16,6 +16,7 @@ export class AquaBoxConfiguration {
     public protocol: string = "http"
     public api: string = "v1"
     public startedAt: number
+    public serial: string
 }
 
 @Serialize({ root: "configuration"})

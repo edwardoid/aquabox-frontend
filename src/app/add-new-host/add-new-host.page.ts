@@ -68,38 +68,33 @@ export class AddNewHostPage implements OnInit {
 
   scan() {
     this.scanner.scanAndComeBack((text) => {
-      try {
-        let status: Object = JSON.parse(text);
-        if (!status.hasOwnProperty("aquabox"))
-          return false;
-        
-        let cfg = status["aquabox"]
-        if (cfg != undefined &&
-            cfg.host != undefined &&
-            cfg.rest != undefined &&
-            cfg.rest > 0 &&
-            cfg.stream != undefined &&
-            cfg.stream > 0 &&
-            cfg.host.length > 0) {
-          this.configuration = cfg;
-          this.configuration.api = "v1";
-          this.configuration.protocol = "http";
-          this.configuration.name = cfg.host;
-          this.configuration.host = cfg.host;
-          
-          for (let h of this.aquabox.hosts) {
-            if (h.configuration.host == this.configuration.host) {
-              return false;
+        try {
+            let tokens = text.split(';');
+
+            if (tokens.length > 4) {
+                this.configuration = new AquaBoxConfiguration();
+                this.configuration.api = "v1";
+                this.configuration.protocol = "http";
+                this.configuration.rest = parseInt(tokens[0]);
+                this.configuration.stream = parseInt(tokens[1]);
+                this.configuration.serial = tokens[2];
+                this.configuration.name = tokens[4];
+                this.configuration.host = tokens[4];
+                
+                for (let h of this.aquabox.hosts) {
+                    if (h.configuration.host == this.configuration.host) {
+                        return false;
+                    }
+                }
+                this.slides.slideTo(3);
+
+                return true;
             }
-          }
-          this.slides.slideTo(3);
-
-          return true;
+        } catch (e) {
+            this.configuration = undefined;
+            return false;
         }
-      } catch (e) {
-        return false;
-      }
-
+        this.configuration = undefined;
       return false;
     });
   }
