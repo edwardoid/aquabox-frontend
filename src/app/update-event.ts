@@ -1,12 +1,13 @@
+import { Aquabox } from './aquabox';
 import { Serialize, SerializeProperty, Serializable } from 'ts-serializer';
 
 
 @Serialize({})
 export class UpdateEvent  extends Serializable {
     
-    Aquabox: string = "aquabox"
-    Device: string = "device"
-    Rule: string = "rule"
+    static Aquabox: string = "aquabox"
+    static Device: string = "device"
+    static Rule: string = "rule"
 
     Box: string
 
@@ -22,10 +23,18 @@ export class UpdateEvent  extends Serializable {
     @SerializeProperty({ map: "props"})
     Properties: object 
 
-    apply(source: object) {
+    apply(source: Serializable) {
         let props = "*" in this.Properties ? this.Properties["*"] : this.Properties; 
-        for(let p in props) {
-            source[p] = this.Properties[p];
-        }
+        this.applyOnObject(source, props);
     }
+
+    applyOnObject(source: Serializable, properties: object) {
+        if (source instanceof Aquabox) {
+            if (properties["connected"]) {
+                source["connected"] = properties["connected"];
+            }
+        }
+        source.deserialize(properties);
+    }
+    
 }

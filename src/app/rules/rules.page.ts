@@ -65,7 +65,7 @@ export class RulesPage implements OnInit {
       if (event.Box != boxId) {
         return;
       }
-      if (event.Class != event.Rule) {
+      if (event.Class != UpdateEvent.Rule) {
         return;
       }
 
@@ -75,13 +75,8 @@ export class RulesPage implements OnInit {
       else if (event.Data["action"] == "created") {
         let r = new Rule(self.box);
         r.deserialize(event.Properties["*"]);
+        r.subscribeForUpdates();
         self.rules.insert(r, true)
-      } if (event.Data["action"] == "updated") {
-        let r = new Rule(self.box);
-        r.deserialize(event.Properties["*"]);
-        if (self.rules.find(event.Sender).enabled != r.enabled) {
-          self.rules.insert(r, true);
-        }
       }
     });
   }

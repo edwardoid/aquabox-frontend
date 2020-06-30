@@ -1,3 +1,4 @@
+import { UpdateConsumer } from './update-consumer';
 import { DevicesMap, RulesMap } from './id-map';
 import { Rule } from './rule';
 import { Device } from './device';
@@ -16,33 +17,21 @@ export class AquaBoxConfiguration {
 }
 
 @Serialize({ root: "configuration"})
-export class Aquabox extends Serializable {
+export class Aquabox extends Serializable{
 
+    private updateConsumer: UpdateConsumer;
     public id: string
     public devices: DevicesMap = new DevicesMap()
     public rules: RulesMap = new RulesMap()
     public internal: Object =  new Object()
     public connected: boolean
 
-    public constructor(private service: AquaBoxService,
+    public constructor(public service: AquaBoxService,
                        public configuration: AquaBoxConfiguration) {
         super();
         this.id = this.configuration.id;
-    
-        this.service.Updates.subscribe((event: UpdateEvent) => {
-            if (event.Box != this.id) {
-              return;
-            }
-            if (event.Class != event.Aquabox) {
-              return;
-            }
-      
-            if (this.id != event.Sender) {
-              return;
-            }
-      
-            event.apply(this);
-          });
+        this.updateConsumer = new UpdateConsumer(this.service, UpdateEvent.Aquabox, this.id, this.id);
+        this.updateConsumer.subscribe(this);
     }
 
     async getDevices(success: (devices: DevicesMap) => void, fail?: () => void) {

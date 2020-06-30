@@ -1,8 +1,10 @@
+import { UpdateConsumer } from './update-consumer';
 import { Action } from './action';
 import { AquaBoxService } from './aqua-box.service';
 import { Aquabox } from './aquabox';
 import { Repeat } from './repeat';
 import { Serialize, SerializeProperty, Serializable } from 'ts-serializer';
+import { UpdateEvent } from './update-event';
 
 /*
 {
@@ -31,6 +33,7 @@ import { Serialize, SerializeProperty, Serializable } from 'ts-serializer';
 
 @Serialize({})
 export class Rule extends Serializable {
+    private updates: UpdateConsumer;
 
     @SerializeProperty({})
     id: string = "-1";
@@ -60,6 +63,12 @@ export class Rule extends Serializable {
 
     constructor(private box: Aquabox) {
         super()
+        this.updates = new UpdateConsumer(box.service, UpdateEvent.Rule, this.id, box.id);
+    }
+
+    subscribeForUpdates() {
+        this.updates.id = this.id;
+        this.updates.subscribe(this);
     }
 
     save(success ?: (result: boolean) => void) {

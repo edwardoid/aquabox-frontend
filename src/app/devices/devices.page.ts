@@ -34,7 +34,7 @@ export class DevicesPage implements OnInit {
       if (event.Box != boxId) {
         return;
       }
-      if (event.Class != event.Device) {
+      if (event.Class != UpdateEvent.Device) {
         return;
       }
 

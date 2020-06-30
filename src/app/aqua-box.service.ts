@@ -94,7 +94,7 @@ export class AquaBoxService {
   connected(box: string, url: string, connected: boolean) {
     let event = new UpdateEvent();
     event.Box = box;
-    event.Class =event.Aquabox;
+    event.Class = UpdateEvent.Aquabox;
     event.Sender = box;
     event.Properties = {
       "connected" : connected
@@ -218,6 +218,7 @@ export class AquaBoxService {
     for (let o of raw) {
       let r = new Rule(box);
       r.deserialize(o);
+      r.subscribeForUpdates();
       res.insert(r);
     }
 
