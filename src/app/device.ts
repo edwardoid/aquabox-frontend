@@ -18,13 +18,22 @@ export class Device extends Serializable {
     name: string;
 
     @SerializeProperty({})
-    isOn: boolean
+    index: number;
 
     @SerializeProperty({})
+    pin: number;
+
+    @SerializeProperty({})
+    isOn: boolean
+
+    @SerializeProperty({ map: "class"})
     deviceClass: string;
 
     @SerializeProperty({})
     type: string;
+
+    @SerializeProperty({})
+    rulesEnabled: boolean;
 
     @SerializeProperty({})
     meta: Map<string, string>;
@@ -58,7 +67,7 @@ export class Device extends Serializable {
         this.service.controlDevice(this, this.box, ActionType.TurnOff, success);
     }
 
-    update() {
-        this.box.update(this);
+    update(success ?: (ok : boolean) => void) {
+        this.service.updateDevice(this.box, this, success);
     }
 }

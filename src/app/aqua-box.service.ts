@@ -279,6 +279,22 @@ export class AquaBoxService {
       });
   }
 
+  updateDevice(box: Aquabox, device: Device, result: (result: boolean) => void) {
+
+    let url = this.baseUrl(box) + "device/" + device.id;
+
+    let data = JSON.stringify(device.serialize());
+
+    this.http.post<Object>(url, data)
+             .subscribe((response) => {
+      if(result)
+        result(true);
+    }, (error) => {
+      this.apiError(error);
+      if(result) result(false);
+    });
+  }
+
   updateRule(box: Aquabox, rule: Rule, update: boolean, result: (result: boolean) => void) {
 
     let url = this.baseUrl(box) + "device/" + rule.device + "/rule";

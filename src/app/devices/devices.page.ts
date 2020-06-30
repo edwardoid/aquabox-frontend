@@ -3,7 +3,7 @@ import { HostsMap, DevicesMap } from './../id-map';
 import { AquaBoxService } from './../aqua-box.service';
 import { Component, OnInit } from '@angular/core';
 import { Device } from '../device';
-import { LoadingController, NavController } from '@ionic/angular';
+import { LoadingController, NavController, AlertController } from '@ionic/angular';
 import { Aquabox } from '../aquabox';
 import { ActivatedRoute } from '@angular/router';
 
@@ -16,11 +16,12 @@ export class DevicesPage implements OnInit {
 
   devices: DevicesMap;
   box: Aquabox;
-  
+
   constructor(private navi: NavController,
-              private route: ActivatedRoute,
-              private loadingController: LoadingController,
-              private aquabox: AquaBoxService) {
+    private route: ActivatedRoute,
+    private loadingController: LoadingController,
+    public alertController: AlertController,
+    private aquabox: AquaBoxService) {
     let boxId = this.route.snapshot.paramMap.get('box');
     this.aquabox.getHosts((hosts: HostsMap) => {
       this.box = hosts.find(boxId);
@@ -53,13 +54,53 @@ export class DevicesPage implements OnInit {
     this.navi.navigateForward("/rules/" + this.box.configuration.id + "/" + dev.id);
   }
 
-  toggleDevice(dev: Device, event) {
+  async toggleDeviceIfRulesAreDisabled(dev: Device) {
+    if (dev.rulesEnabled) {
+      dev.isOn = !dev.isOn;
+      const alert = await this.alertController.create({
+        header: "Disable applying rules",
+        message: "Device <strong>" + dev.name + "</strong> is enabled for rules. " +
+                 "To control it manually applying rules on it must be disabled. " +
+                 "Do you want to disable rules on <strong>" + dev.name + "</strong>",
+        buttons: [
+          {
+            text: 'Cancel',
+            role: 'cancel',
+            cssClass: 'secondary',
+            handler: () => { 
+            }
+          },
+          {
+            text: 'Okay',
+            handler: () => {
+              dev.rulesEnabled = false;
+              dev.update((ok: boolean) => {
+                dev.rulesEnabled = !ok;
+                this.toggleDevice(dev);
+              });
+            }
+          }
+        ]
+      });
+
+      await alert.present();
+    } else {
+      this.toggleDevice(dev);
+    }
+  }
+
+  enableRulesOn(dev) {
+    dev.rulesEnabled = true;
+    dev.update((ok: boolean) => {
+      dev.rulesEnabled = ok;
+    });
+  }
+
+  toggleDevice(dev: Device) {
     if (dev.isOn)
       dev.turnOff();
     else
       dev.turnOn();
-    
-    //this.getDevices(event);
   }
 
   async getDevices(event) {

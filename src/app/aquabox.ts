@@ -45,10 +45,6 @@ export class Aquabox extends Serializable{
         )
     }
 
-    update(device: Device) {
-        this.service.getDevice(device, this);
-    }
-
     getRules(success: (rules: RulesMap) => void, fail?: () => void) {
         this.service.fetchRules(
             this,
