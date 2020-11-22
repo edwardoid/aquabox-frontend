@@ -132,14 +132,15 @@ export class AquaBoxService {
     }
 
     addHost(configuration: AquaBoxConfiguration) {
-        let cloudConfig = configuration;
-        cloudConfig.host = this.APP_SERVER;
-        this.testConfiguration(cloudConfig, (result: boolean) => {
+        var originalHost = configuration.host;
+        configuration.host = this.APP_SERVER;
+        this.testConfiguration(configuration, (result: boolean) => {
             if (result) {
-                let box = new Aquabox(this, cloudConfig);
+                let box = new Aquabox(this, configuration);
                 this.hosts.insert(box);
                 this.saveHosts();
             } else {
+                configuration.host = originalHost;
                 this.testConfiguration(configuration, (result: boolean) => {
                     if (result) {
                         let box = new Aquabox(this, configuration);
@@ -197,9 +198,9 @@ export class AquaBoxService {
         console.error(text);
         const toast = await this.toastController.create({
             message: text,
-            showCloseButton: true,
-            position: 'top',
-            closeButtonText: 'Done',
+            //showCloseButton: true,
+            //position: 'top',
+            //closeButtonText: 'Done',
             duration: 10000
         });
         toast.present();
@@ -389,8 +390,17 @@ export class AquaBoxService {
         )
     }
 
-    getNetworks(box: Aquabox, success?: (result: WiFiInfo[]) => void) {
+    scanForNetworks(box: Aquabox, success?: (result: boolean) => void) {
         this.http.get<Object>(this.baseUrl(box) + "wifi/scan", { headers: this.headers(box) })
+            .subscribe((response) => {
+                success(true);
+            }, (error) => {
+                this.apiError(error);
+            });
+    }
+
+    getNetworks(box: Aquabox, success?: (result: WiFiInfo[]) => void) {
+        this.http.get<Object>(this.baseUrl(box) + "wifi/networks", { headers: this.headers(box) })
             .subscribe((response) => {
                 let raw = response["networks"];
                 if (!Array.isArray(raw)) {

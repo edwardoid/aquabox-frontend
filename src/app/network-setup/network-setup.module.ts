@@ -1,3 +1,4 @@
+//import { NetworkAuthentificationComponent } from './../network-authentification/network-authentification.component';
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -20,6 +21,9 @@ const routes: Routes = [
     FormsModule,
     IonicModule,
     RouterModule.forChild(routes)
+  ],
+  entryComponents: [
+    //NetworkAuthentificationComponent
   ],
   declarations: [NetworkSetupPage]
 })

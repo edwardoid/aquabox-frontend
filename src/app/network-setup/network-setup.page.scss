@@ -1,0 +1,9 @@
+.simpleContainer {
+    text-align: center !important;
+    margin: auto;
+}
+
+.simpleContainerLarge {
+    @extend .simpleContainer;
+    width: 100%;
+}

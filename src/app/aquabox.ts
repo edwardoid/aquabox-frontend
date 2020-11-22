@@ -81,6 +81,10 @@ export class Aquabox extends Serializable{
         this.service.getStatus(this, success);
     }
 
+    scanForNetworks(success ?: (result: boolean) => void) {
+        this.service.scanForNetworks(this, success);
+    }
+
     getNetworks(success ?: (result: WiFiInfo[]) => void) {
         this.service.getNetworks(this, success);
     }

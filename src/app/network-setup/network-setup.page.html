@@ -1,7 +1,7 @@
 <ion-header>
     <ion-toolbar>
         <ion-buttons slot="start">
-            <ion-back-button></ion-back-button>
+            <ion-back-button>Back</ion-back-button>
         </ion-buttons>
         <ion-title>
             Available WiFi networks
@@ -10,21 +10,54 @@
 </ion-header>
 
 <ion-content>
-  <ion-refresher slot="fixed" (ionRefresh)="scan($event)">
-    <ion-refresher-content pullingIcon="arrow-dropdown" pullingText="Pull to refresh" refreshingSpinner="circles"
-      refreshingText="Scanning...">
-    </ion-refresher-content>
-  </ion-refresher>
-  <ion-list *ngFor="let net of this?.networks">
-    <ion-item>
-      <ion-col>
-        <h1>{{net.SSID}}</h1>
-        <h2>{{net.security}}</h2>
-      </ion-col>
+    <ion-slides [options]="sliderOpts" #slides>
+        <ion-slide>
+            <div class="simpleContainerLarge">
+                <ion-button slot="end" (click)="scan($event)">
+                    Refresh
+                </ion-button>
+                <ion-list *ngFor=" let net of this?.networks ">
+                    <ion-item (click)="connectTo(net) ">
+                        <ion-col>
+                            <h1>{{net.SSID}}</h1>
+                            <h2>{{net.security}}</h2>
+                        </ion-col>
 
-      <ion-thumbnail slot="end">
-        <img src="/assets/icon/wifi_{{icon(net.signal)}}.svg" />
-      </ion-thumbnail>
-    </ion-item>
-  </ion-list>
+                        <ion-thumbnail slot="end ">
+                            <img src="/assets/icon/wifi_{{icon(net.signal)}}.svg " />
+                        </ion-thumbnail>
+                    </ion-item>
+                </ion-list>
+            </div>
+        </ion-slide>
+        <ion-slide>
+            <div class="simpleContainerLarge">
+                <h2>Authenticate to {{ssid}}</h2>
+                <ion-input (ionChange)="nameChanged($event) " [(ngModel)]="password " type="password " autofocus="true " inputmode="latin-name " minlength="8 " placeholder="password ">
+                </ion-input>
+                <ion-button color="success " size="large " (click)="doConnect() " disabled="true " #connectButton>Connect</ion-button>
+            </div>
+        </ion-slide>
+        <ion-slide>
+            <div class="simpleContainerLarge">
+                <h2>Connecting...</h2>
+                <ion-progress-bar type="indeterminate"></ion-progress-bar>
+            </div>
+        </ion-slide>
+        <ion-slide>
+            <ion-text color="success">
+                <h2>Connected!</h2>
+            </ion-text>
+            <ion-text color="danger">
+                <h2>Authentification failed</h2>
+                <h2>Can't connect. Check if network is available!</h2>
+            </ion-text>
+            <ion-button color="success">
+                Go to home
+            </ion-button>
+            <ion-button color="success">
+                Retry
+            </ion-button>
+        </ion-slide>
+    </ion-slides>
 </ion-content>

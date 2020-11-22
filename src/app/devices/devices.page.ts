@@ -9,128 +9,128 @@ import { ActivatedRoute } from '@angular/router';
 import { TranslatorService } from '../translator.service';
 
 @Component({
-  selector: 'app-list',
-  templateUrl: 'devices.page.html',
-  styleUrls: ['devices.page.scss']
+    selector: 'app-list',
+    templateUrl: 'devices.page.html',
+    styleUrls: ['devices.page.scss']
 })
 export class DevicesPage implements OnInit {
 
-  devices: DevicesMap;
-  box: Aquabox;
+    devices: DevicesMap;
+    box: Aquabox;
 
-  constructor(private navi: NavController,
-    private route: ActivatedRoute,
-    private loadingController: LoadingController,
-    public alertController: AlertController,
-  private aquabox: AquaBoxService,
-    private tr: TranslatorService) {
-    let boxId = this.route.snapshot.paramMap.get('box');
-    this.aquabox.getHosts((hosts: HostsMap) => {
-      this.box = hosts.find(boxId);
-      if (this.box)
-        this.getDevices(undefined);
-      else
-        this.navi.navigateRoot("/home");
-    });
+    constructor(private navi: NavController,
+        private route: ActivatedRoute,
+        private loadingController: LoadingController,
+        public alertController: AlertController,
+        private aquabox: AquaBoxService,
+        private tr: TranslatorService) {
+        let boxId = this.route.snapshot.paramMap.get('box');
+        this.aquabox.getHosts((hosts: HostsMap) => {
+            this.box = hosts.find(boxId);
+            if (this.box)
+                this.getDevices(undefined);
+            else
+                this.navi.navigateRoot("/home");
+        });
 
-    this.aquabox.Updates.subscribe((event: UpdateEvent) => {
-      if (event.Box != boxId) {
-        return;
-      }
-      if (event.Class != UpdateEvent.Device) {
-        return;
-      }
-
-      if (!this.devices.contains(event.Sender)) {
-        return;
-      }
-
-      event.apply(this.devices.find(event.Sender))
-    });
-  }
-
-  ngOnInit() {
-  }
-
-  openRules(dev: Device) {
-    this.navi.navigateForward("/rules/" + this.box.configuration.id + "/" + dev.id);
-  }
-
-  async toggleDeviceIfRulesAreDisabled(dev: Device) {
-    if (dev.rulesEnabled) {
-      dev.isOn = !dev.isOn;
-      const alert = await this.alertController.create({
-        header: "Disable applying rules",
-        message: "Device <strong>" + dev.name + "</strong> is enabled for rules. " +
-                 "To control it manually applying rules on it must be disabled. " +
-                 "Do you want to disable rules on <strong>" + dev.name + "</strong>",
-        buttons: [
-          {
-            text: 'Cancel',
-            role: 'cancel',
-            cssClass: 'secondary',
-            handler: () => { 
+        this.aquabox.Updates.subscribe((event: UpdateEvent) => {
+            if (event.Box != boxId) {
+                return;
             }
-          },
-          {
-            text: 'Okay',
-            handler: () => {
-              dev.rulesEnabled = false;
-              dev.update((ok: boolean) => {
-                dev.rulesEnabled = !ok;
-                this.toggleDevice(dev);
-              });
+            if (event.Class != UpdateEvent.Device) {
+                return;
             }
-          }
-        ]
-      });
 
-      await alert.present();
-    } else {
-      this.toggleDevice(dev);
+            if (!this.devices.contains(event.Sender)) {
+                return;
+            }
+
+            event.apply(this.devices.find(event.Sender))
+        });
     }
-  }
 
-  setupDevice(dev) {
-    this.navi.navigateForward("/device-setup/" + this.box.configuration.id + "/" + dev.id);
-  }
+    ngOnInit() {
+    }
 
-  enableRulesOn(dev) {
-    dev.rulesEnabled = true;
-    dev.update((ok: boolean) => {
-      dev.rulesEnabled = ok;
-    });
-  }
+    openRules(dev: Device) {
+        this.navi.navigateForward("/rules/" + this.box.configuration.id + "/" + dev.id);
+    }
 
-  toggleDevice(dev: Device) {
-    if (dev.isOn)
-      dev.turnOff();
-    else
-      dev.turnOn();
-  }
+    async toggleDeviceIfRulesAreDisabled(dev: Device) {
+        if (dev.rulesEnabled) {
+            dev.isOn = !dev.isOn;
+            const alert = await this.alertController.create({
+                header: "Disable applying rules",
+                message: "Device <strong>" + dev.name + "</strong> is enabled for rules. " +
+                    "To control it manually applying rules on it must be disabled. " +
+                    "Do you want to disable rules on <strong>" + dev.name + "</strong>",
+                buttons: [
+                    {
+                        text: 'Cancel',
+                        role: 'cancel',
+                        cssClass: 'secondary',
+                        handler: () => {
+                        }
+                    },
+                    {
+                        text: 'Okay',
+                        handler: () => {
+                            dev.rulesEnabled = false;
+                            dev.update((ok: boolean) => {
+                                dev.rulesEnabled = !ok;
+                                this.toggleDevice(dev);
+                            });
+                        }
+                    }
+                ]
+            });
 
-  async getDevices(event) {
-    const loading = await this.loadingController.create({
-      message: "Loading devices...",
-      duration: 30000
-    });
-
-    let self = this;
-    await loading.present().then(() => {
-
-      self.box.getDevices(
-        (devices: DevicesMap) => {
-          self.devices = devices;
-          loading.dismiss();
-          if (event)
-            event.target.complete();
-        },
-        () => {
-          loading.dismiss();
-          if (event)
-            event.target.complete();
+            await alert.present();
+        } else {
+            this.toggleDevice(dev);
         }
-      );
-    });
-  }
+    }
+
+    setupDevice(dev) {
+        this.navi.navigateForward("/device-setup/" + this.box.configuration.id + "/" + dev.id);
+    }
+
+    enableRulesOn(dev) {
+        dev.rulesEnabled = true;
+        dev.update((ok: boolean) => {
+            dev.rulesEnabled = ok;
+        });
+    }
+
+    toggleDevice(dev: Device) {
+        if (dev.isOn)
+            dev.turnOff();
+        else
+            dev.turnOn();
+    }
+
+    async getDevices(event) {
+        const loading = await this.loadingController.create({
+            message: "Loading devices...",
+            duration: 30000
+        });
+
+        let self = this;
+        await loading.present().then(() => {
+
+            self.box.getDevices(
+                (devices: DevicesMap) => {
+                    self.devices = devices;
+                    loading.dismiss();
+                    if (event)
+                        event.target.complete();
+                },
+                () => {
+                    loading.dismiss();
+                    if (event)
+                        event.target.complete();
+                }
+            );
+        });
+    }
 }
