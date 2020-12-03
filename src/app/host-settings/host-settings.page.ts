@@ -43,15 +43,12 @@ export class HostSettingsPage implements OnInit {
     this.configuration.serial = src.serial;
   }
 
-  onAfterInit() {
+  ngAfterViewInit() {
     this.redrawQR();
   }
 
   redrawQR() {
     toCanvas(this.qrCanvas.nativeElement, JSON.stringify({ "aquabox" : this.configuration }), { }, undefined);
-  }
-
-  ngAfterViewInit(){
   }
 
   selectNetwork() {
