@@ -1,4 +1,4 @@
-<ion-header>
+<ion-header [translucent]="true">
   <ion-toolbar>
     <ion-buttons slot="start">
       <ion-menu-button></ion-menu-button>
@@ -9,7 +9,7 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="main-background-gradient">
+<ion-content class="main-background-gradient" [fullscreen]="true">
   <ion-list *ngFor="let host of aquabox.hosts">
     <ion-card>
       <ion-card-header>

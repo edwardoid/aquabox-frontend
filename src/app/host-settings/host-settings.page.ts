@@ -41,7 +41,10 @@ export class HostSettingsPage implements OnInit {
     this.configuration.rest = src.rest;
     this.configuration.stream = src.stream;
     this.configuration.serial = src.serial;
-    toCanvas(this.qrCanvas.nativeElement, JSON.stringify({ "aquabox" : this.configuration }), { }, undefined);
+  }
+
+  onAfterInit() {
+    this.redrawQR();
   }
 
   redrawQR() {

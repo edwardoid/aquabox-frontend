@@ -83,7 +83,7 @@ export class RuleWizardPage implements OnInit {
     });
   }
 
-  ngOnInit() {
+  onAfterInit() {
     
     this.doneButton.disabled = this.rule.actions.length == 0 || this.rule.name.length == 0;
     

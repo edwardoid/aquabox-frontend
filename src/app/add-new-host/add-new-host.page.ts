@@ -23,7 +23,7 @@ export class AddNewHostPage implements OnInit {
         loop: false
     }
 
-    @ViewChild('slides') slides: IonSlides;
+    @ViewChild('slides') private slides: IonSlides;
     @ViewChild('doneButton') doneButton: IonButton;
 
     constructor(private nav: NavController,
@@ -45,6 +45,10 @@ export class AddNewHostPage implements OnInit {
     }
 
     ngOnInit() {
+        this.ready = false;
+    }
+
+    ngAfterViewInit() {
         this.slides.getActiveIndex()
             .then((idx: number) => {
                 this.sliderIndex = idx;
