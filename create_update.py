@@ -11,7 +11,7 @@ location = sys.argv[5]
 template = """<update>
     <version>$version</version>
     <name>$name</name>
-    <url>$host/aquabox-$postfix.apk</url>
+    <url>$host/aquabox-$version.apk</url>
 </update>"""
 
 template = template.replace("$name", name).replace("$version", version).replace("$postfix", postfix).replace("$host", host)
