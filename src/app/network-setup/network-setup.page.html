@@ -12,10 +12,14 @@
 <ion-content>
     <ion-slides [options]="sliderOpts" #slides>
         <ion-slide>
+
+            <ion-refresher slot="fixed" (ionRefresh)="scan($event)">
+                <ion-refresher-content pullingIcon="arrow-dropdown" pullingText="Pull to refresh" refreshingSpinner="circles" refreshingText="Refreshing...">
+                </ion-refresher-content>
+            </ion-refresher>
+
+
             <div class="simpleContainerLarge">
-                <ion-button slot="end" (click)="scan($event)">
-                    Refresh
-                </ion-button>
                 <ion-list *ngFor=" let net of this?.networks ">
                     <ion-item (click)="connectTo(net) ">
                         <ion-col>

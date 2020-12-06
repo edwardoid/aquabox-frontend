@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="com.sargsyan.app" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
-    <name>Aquabox App</name>
+<widget id="com.sargsyan.devapp" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+    <name>Aquabox Devel</name>
     <description>Aquabox remote control</description>
     <author email="edward.sarkisyan@gmail.com" href="http://twitter.com/arsenovich">Eduard Sargsyan</author>
     <content src="index.html" />

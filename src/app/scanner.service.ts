@@ -83,7 +83,7 @@ export class ScanService {
 
   scan(): Promise<any> {
     if (this.platform.is("desktop")) {
-      this.lastScannedText = "1213;1214;testDev;192.168.1.26;46";
+      this.lastScannedText = "1213;1214;testDev;192.168.1.82;46";
       return new Promise<any>((resolve, reject) => {
         if (this.filter(this.lastScannedText))
           resolve(this.lastScannedText);

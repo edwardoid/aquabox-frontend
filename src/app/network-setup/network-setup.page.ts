@@ -17,6 +17,7 @@ export class NetworkSetupPage implements OnInit {
     networks: WiFiInfo[] = [];
     password: string
     ssid: string
+    boxId: string
 
     sliderOpts = {
         allowTouchMove: false,
@@ -32,23 +33,25 @@ export class NetworkSetupPage implements OnInit {
         private aquabox: AquaBoxService,
         private modalController: ModalController
     ) {
-        let boxId = this.route.snapshot.paramMap.get('box');
-        if (!this.aquabox.hosts.contains(boxId)) {
+        this.boxId = this.route.snapshot.paramMap.get('box');
+        if (!this.aquabox.hosts.contains(this.boxId)) {
             this.navi.back();
         }
 
-        this.box = this.aquabox.hosts.find(boxId);
+        this.box = this.aquabox.hosts.find(this.boxId);
     }
 
     ngOnInit() {
-        let boxId = this.route.snapshot.paramMap.get('box');
-        if (!this.aquabox.hosts.contains(boxId)) {
+        this.boxId = this.route.snapshot.paramMap.get('box');
+        if (!this.aquabox.hosts.contains(this.boxId)) {
             this.navi.back();
         }
+    }
 
+    ngAfterViewInit() {
         this.slides.slideTo(0);
 
-        this.box = this.aquabox.hosts.find(boxId);
+        this.box = this.aquabox.hosts.find(this.boxId);
         this.box.getNetworks((nets: WiFiInfo[]) => {
             this.networks = nets;
         });
