@@ -19,20 +19,20 @@ import { Aquabox } from '../aquabox';
   templateUrl: './rule-wizard.page.html',
   styleUrls: ['./rule-wizard.page.scss'],
   animations: [
-        trigger('listItemState', [
-            transition('void => *', [
-                style({transform: 'translateX(-100%)'}),
-                animate('100ms ease-out')
-            ]),
-            transition('* => void', [
-              animate('500ms ease-out', style({
-                opacity: 0,
-                height: '0px',
-                minHeight: '0px'
-              }))
-          ])
-        ])
-    ]
+    trigger('listItemState', [
+      transition('void => *', [
+        style({ transform: 'translateX(-100%)' }),
+        animate('100ms ease-out')
+      ]),
+      transition('* => void', [
+        animate('500ms ease-out', style({
+          opacity: 0,
+          height: '0px',
+          minHeight: '0px'
+        }))
+      ])
+    ])
+  ]
 })
 export class RuleWizardPage implements OnInit {
 
@@ -40,56 +40,55 @@ export class RuleWizardPage implements OnInit {
   box: Aquabox
   devices: any = []
   dates: any[] = []
+  enableRule: boolean = true
 
   @ViewChild('doneButton') doneButton: IonButton;
 
   constructor(public alertController: AlertController,
-              private route: ActivatedRoute,
-              private navi: NavController,
-              private aquabox: AquaBoxService) {
-    let boxId = this.route.snapshot.paramMap.get("box");
-    let devId = this.route.snapshot.paramMap.get("dev");
-    let ruleId = this.route.snapshot.paramMap.get("rule");
-
-    this.aquabox.getHosts((hosts: HostsMap) => {
-        this.box = hosts.find(boxId);
-
-        if (!this.box) {
-          navi.navigateRoot("/home");
-        }
-
-        this.box.getDevices((devices: DevicesMap) => {
-          for(let dev of devices) {
-            this.devices.push({ 
-              id: dev.id,
-              name: dev.name
-            });
-
-            if (ruleId) {
-              this.box.getRules((rules: RulesMap) => {
-                this.rule = rules.find(ruleId);
-              });
-
-              if (!this.rule) {
-                navi.navigateRoot("/home");
-              }
-            }
-            else {
-              this.rule = new Rule(this.box);
-              this.rule.device = devId;
-            }
-          }
-        });
-    });
+    private route: ActivatedRoute,
+    private navi: NavController,
+    private aquabox: AquaBoxService) {
   }
 
   ngOnInit() {
   }
 
   ngAfterViewInit() {
-    
-    this.doneButton.disabled = this.rule.actions.length == 0 || this.rule.name.length == 0;
-    
+    let boxId = this.route.snapshot.paramMap.get("box");
+    let devId = this.route.snapshot.paramMap.get("dev");
+    let ruleId = this.route.snapshot.paramMap.get("rule");
+
+    this.aquabox.getHosts((hosts: HostsMap) => {
+      this.box = hosts.find(boxId);
+
+      if (!this.box) {
+        this.navi.navigateRoot("/home");
+      }
+
+      this.box.getDevices((devices: DevicesMap) => {
+        for (let dev of devices) {
+          this.devices.push({
+            id: dev.id,
+            name: dev.name
+          });
+
+          if (ruleId) {
+            this.box.getRules((rules: RulesMap) => {
+              this.rule = rules.find(ruleId);
+            });
+
+            if (!this.rule) {
+              this.navi.navigateRoot("/home");
+            }
+          }
+          else {
+            this.rule = new Rule(this.box);
+            this.rule.device = devId;
+            this.doneButton.disabled = this.rule.actions.length == 0 || this.rule.name.length == 0;
+          }
+        }
+      });
+    });
   }
 
   nameChanged(event: any) {
@@ -130,6 +129,7 @@ export class RuleWizardPage implements OnInit {
   }
 
   save() {
+    this.rule.enabled = this.enableRule
     for (let i in this.rule.actions) {
       this.rule.actions[i].at = Date.parse(this.dates[i]);
     }
