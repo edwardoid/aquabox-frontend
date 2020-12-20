@@ -9,7 +9,7 @@ host = sys.argv[4]
 location = sys.argv[5]
 
 template = """<update>
-    <version>$version</version>
+    <version>100$version</version>
     <name>$name</name>
     <url>$host/aquabox-$version.apk</url>
 </update>"""
