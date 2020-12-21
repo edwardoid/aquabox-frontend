@@ -3,7 +3,7 @@ import { AquaBoxConfiguration, Aquabox } from './aquabox';
 import { AquaBoxService } from './aqua-box.service';
 import { Component } from '@angular/core';
 
-import { Platform } from '@ionic/angular';
+import { AlertController, Platform } from '@ionic/angular';
 import { SplashScreen } from '@ionic-native/splash-screen/ngx';
 import { StatusBar } from '@ionic-native/status-bar/ngx';
 import { AppUpdate } from '@ionic-native/app-update/ngx';
@@ -27,7 +27,8 @@ export class AppComponent {
         private platform: Platform,
         private splashScreen: SplashScreen,
         private statusBar: StatusBar,
-        public aquabox: AquaBoxService
+        public aquabox: AquaBoxService,
+        public alertController: AlertController
     ) {
         if (this.platform.is("android")) {
             this.appUpdate = new AppUpdate();
@@ -35,7 +36,22 @@ export class AppComponent {
         this.initializeApp();
     }
 
-    initializeApp() {
+    async updateFailed(error) {
+        let msg = "";
+        if (typeof (error) === "string")
+            msg = error;
+        else
+            msg = error.msg;
+        const failAlert = await this.alertController.create({
+            header: "Can't update device information",
+            message: msg,
+            buttons: ['OK']
+        });
+
+        failAlert.present();
+    }
+
+    async initializeApp() {
         this.platform.ready().then(() => {
             this.statusBar.styleLightContent();
             this.statusBar.show();
@@ -47,7 +63,7 @@ export class AppComponent {
                 this.appUpdate.checkAppUpdate(updateUrl).then(update => {
                     alert("Update Status:  " + update.msg);
                 }).catch(error => {
-                    alert("Error: " + error.msg);
+                    this.updateFailed(error);
                 });
             }
 
