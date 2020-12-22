@@ -1,6 +1,6 @@
 export enum Security {
     WEP = "wep",
-    WPA = "wps",
+    WPA = "wpa",
     WPA2 = "wpa2",
     Enterprize = "enterpeize",
     None = "none",

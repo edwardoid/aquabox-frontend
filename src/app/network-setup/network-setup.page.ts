@@ -5,6 +5,7 @@ import { ActivatedRoute } from '@angular/router';
 import { NavController, LoadingController, ModalController, IonButton, IonSlides } from '@ionic/angular';
 import { Aquabox } from './../aquabox';
 import { Component, OnInit, ViewChild } from '@angular/core';
+import { Security } from '../Security';
 
 @Component({
     selector: 'app-network-setup',
@@ -53,7 +54,7 @@ export class NetworkSetupPage implements OnInit {
 
         this.box = this.aquabox.hosts.find(this.boxId);
         this.box.getNetworks((nets: WiFiInfo[]) => {
-            this.networks = nets;
+            this.networks = this.sortNetworks(nets)
         });
     }
 
@@ -63,12 +64,42 @@ export class NetworkSetupPage implements OnInit {
     }
 
     connectTo(net: WiFiInfo) {
+        if (this.isCurrent(net)) {
+            return;
+        }
         this.ssid = net.SSID;
         this.slides.slideTo(1);
     }
 
     icon(strength: number) {
         return Math.floor(strength / 30.);
+    }
+
+    canConnect(net: WiFiInfo) {
+        return net.security == "wpa2";
+    }
+
+    isCurrent(net: WiFiInfo) {
+        return net.ip !== undefined && net.ip != "";
+    }
+
+    sortNetworks(nets: WiFiInfo[]) {
+        return nets.sort((a: WiFiInfo, b: WiFiInfo) => {
+            let securityPriority = [ Security.WPA2, Security.WPA, Security.WEP, Security.Enterprize, Security.None, Security.Unknown ];
+            let as = securityPriority.indexOf(a.security);
+            let bs = securityPriority.indexOf(b.security);
+            if (as !== bs) {
+                return as < bs ? -1 : 1;
+            }
+
+            if (a.signal != b.signal) {
+                return a.signal < b.signal ? 1 : -1;
+            }
+
+            if(a.SSID == b.SSID) return 0;
+
+            return a.SSID < b.SSID ? 1 : -1;
+        });
     }
 
     async scan(event) {
@@ -89,7 +120,7 @@ export class NetworkSetupPage implements OnInit {
                         return;
                     }
                     self.box.getNetworks((networks: WiFiInfo[]) => {
-                        this.networks = networks;
+                        this.networks = this.sortNetworks(networks)
 
                         loading.dismiss();
                         if (event)
