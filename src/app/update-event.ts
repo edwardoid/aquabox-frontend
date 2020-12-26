@@ -6,6 +6,7 @@ import { Serialize, SerializeProperty, Serializable } from 'ts-serializer';
 export class UpdateEvent  extends Serializable {
     
     static Aquabox: string = "aquabox"
+    static Network: string = "network"
     static Device: string = "device"
     static Rule: string = "rule"
 

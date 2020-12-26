@@ -1,42 +1,52 @@
 import { UpdateEvent } from './update-event';
 import { AquaBoxService } from './aqua-box.service';
 import { Serializable } from 'ts-serializer';
+import { send } from 'process';
 
 
 export class UpdateConsumer {
-    
-    private starUpdateProcessorCb: (update: object) => void;
 
-    constructor(private service: AquaBoxService, private consumerClass : string, public id: string, public boxId) {
+    private handler: (event: UpdateEvent) => void;
+    private id: string;
+    private boxId: string;
+    private consumerClass: string
+
+    constructor(private service: AquaBoxService) {
     }
 
-    setStarUpdateProcessor(processor: (update: object) => void) {
-        this.starUpdateProcessorCb = processor;
+    setBoxFilter(boxId: string) {
+        this.boxId = boxId;
     }
 
-    subscribe(consumer: Serializable, starUpdateProcessorCb?: (update: object) => void) {
-        if (starUpdateProcessorCb)
-            this.setStarUpdateProcessor(starUpdateProcessorCb)
+    setEventClassFilter(clazz: string) {
+        this.consumerClass = clazz;
+    }
+
+    setSenderFilter(sender: string) {
+        this.id = sender;
+    }
+
+    setEventHandler(handler: (event: UpdateEvent) => void) {
+        this.handler = handler;
+    }
+
+    subscribe() {
         let self = this;
         this.service.Updates.subscribe((event: UpdateEvent) => {
-            if (event.Box != self.boxId) {
+            if (self.boxId != undefined && event.Box != self.boxId) {
                 return;
             }
 
-            if (event.Class != self.consumerClass) {
+            if (self.consumerClass != undefined && event.Class != self.consumerClass) {
                 return;
             }
 
-            if (event.Sender != self.id) {
+            if (self.id != undefined && event.Sender != self.id) {
                 return;
             }
 
-            if (!event.Properties["*"]) {
-                event.apply(consumer);
-            } else if(self.starUpdateProcessorCb) {
-                self.starUpdateProcessorCb(event.Properties["*"]);
-            } else {
-                event.apply(consumer);
+            if (self.handler != undefined) {
+                self.handler(event);
             }
         });
     }

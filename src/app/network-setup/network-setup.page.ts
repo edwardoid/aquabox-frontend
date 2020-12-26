@@ -17,7 +17,7 @@ export class NetworkSetupPage implements OnInit {
     box: Aquabox = null;
     networks: WiFiInfo[] = [];
     password: string
-    ssid: string
+    selectedNetwork: WiFiInfo
     boxId: string
 
     sliderOpts = {
@@ -60,14 +60,14 @@ export class NetworkSetupPage implements OnInit {
 
     nameChanged(event: any) {
         this.password = event.target.value;
-        this.connectButton.disabled = this.password.length < 8;
+        this.connectButton.disabled = this.password.length < 8; 
     }
 
     connectTo(net: WiFiInfo) {
         if (this.isCurrent(net)) {
             return;
         }
-        this.ssid = net.SSID;
+        this.selectedNetwork = net;
         this.slides.slideTo(1);
     }
 
@@ -85,7 +85,7 @@ export class NetworkSetupPage implements OnInit {
 
     sortNetworks(nets: WiFiInfo[]) {
         return nets.sort((a: WiFiInfo, b: WiFiInfo) => {
-            let securityPriority = [ Security.WPA2, Security.WPA, Security.WEP, Security.Enterprize, Security.None, Security.Unknown ];
+            let securityPriority = [Security.WPA2, Security.WPA, Security.WEP, Security.Enterprize, Security.None, Security.Unknown];
             let as = securityPriority.indexOf(a.security);
             let bs = securityPriority.indexOf(b.security);
             if (as !== bs) {
@@ -96,7 +96,7 @@ export class NetworkSetupPage implements OnInit {
                 return a.signal < b.signal ? 1 : -1;
             }
 
-            if(a.SSID == b.SSID) return 0;
+            if (a.SSID == b.SSID) return 0;
 
             return a.SSID < b.SSID ? 1 : -1;
         });
@@ -132,7 +132,20 @@ export class NetworkSetupPage implements OnInit {
     }
 
     async doConnect() {
-        this.slides.slideTo(2);
+        if (this.selectedNetwork !== undefined) {
+            this.selectedNetwork.password = this.password
+            this.box.connectToWifi(this.selectedNetwork, (uuid: string) => {
+                this.password = "";
+                if (uuid !== undefined && uuid.length > 0) {
+                    this.slides.slideTo(2)
+                } else {
+                    this.slides.slideTo(0);
+                }
+            });
+        } else {
+            this.slides.slideTo(0);
+            this.password = "";
+        }
     }
 
     async authentificate(network: WiFiInfo) {

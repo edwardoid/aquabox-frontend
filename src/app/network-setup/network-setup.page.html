@@ -46,7 +46,7 @@
             <ion-grid>
                 <ion-row class="ion-align-items-center">
                     <ion-col>
-                        <h2>Authenticate to {{ssid}}</h2>
+                        <h2>Authenticate to {{selectedNetwork?.SSID}}</h2>
                     </ion-col>
                 </ion-row>
                 <ion-row class="ion-align-items-center">
@@ -69,51 +69,27 @@
             <ion-grid>
                 <ion-row>
                     <ion-col>
-                        <h2>Connecting...</h2>
-                    </ion-col>
-                </ion-row>
-                <ion-row>
-                    <ion-col>
-                        <ion-progress-bar type="indeterminate"></ion-progress-bar>
-                    </ion-col>
-                </ion-row>
-            </ion-grid>
-        </ion-slide>
-        <ion-slide>
-            <ion-grid>
-                <ion-row>
-                    <ion-col>
-                        <ion-text color="success">
-                            <h2>Connected!</h2>
+                        <ion-text>
+                            <h2>Connecting...</h2>
                         </ion-text>
                     </ion-col>
                 </ion-row>
                 <ion-row>
                     <ion-col>
-                        <ion-text color="danger">
-                            <h1>Authentification failed</h1>
+                        <ion-text>
+                            <h3>
+                                Your <b>Aquabox</b> now is trying to connect to {{selectedNetwork?.SSID}}. See at
+                                display on <b>Aquabox</b> to see connection states. If connection will fail,
+                                <b>Aquabox</b> will automatically try to reconnect to previous WiFi network. When
+                                <b>Aquabox</b> connect to selected network you will see it online back.
+                            </h3>
                         </ion-text>
                     </ion-col>
                 </ion-row>
                 <ion-row>
                     <ion-col>
-                        <ion-text color="danger">
-                            <h2>Can't connect. Check if network is available!</h2>
-                        </ion-text>
-                    </ion-col>
-                </ion-row>
-                <ion-row>
-                    <ion-col>
-                        <ion-button color="success">
-                            Go to home
-                        </ion-button>
-                    </ion-col>
-                </ion-row>
-
-                <ion-row>
-                    <ion-col>
-                        <ion-button color="warning">
-                            Retry
+                        <ion-button size="large" color="success" href="/">
+                            Go to main screen
                         </ion-button>
                     </ion-col>
                 </ion-row>

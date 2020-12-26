@@ -12,6 +12,9 @@ export class WiFiInfo extends Serializable {
     @SerializeProperty({})
     encrypted: boolean
 
+    @SerializeProperty({})
+    password: string
+
     @SerializeProperty({ map: "auth"})
     security: Security
 

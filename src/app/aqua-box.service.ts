@@ -112,8 +112,9 @@ export class AquaBoxService {
             return;
         }
         let ws = new $WebSocket(url);
+        this.ws[key] = ws;
+
         ws.onOpen(() => {
-            this.ws[key] = ws;
             this.connected(aquabox.id, key, true);
             aquabox.getStatus(); // Update status if we have connection
         });
@@ -396,6 +397,26 @@ export class AquaBoxService {
                 success(true);
             }, (error) => {
                 this.apiError(error);
+            });
+    }
+
+    connectToWifi(box: Aquabox, wifi: WiFiInfo, success?: (uid: string) => void) {
+        let url = this.baseUrl(box) + "wifi/connect";
+
+        let data = JSON.stringify(wifi.serialize());
+
+        this.http.post<Object>(url, data, { headers: this.headers(box) })
+            .subscribe((response) => {
+                if (response.hasOwnProperty("uuid")) {
+                    success(response["uuid"].toString());
+                } else {
+                    success("");
+                }
+            }, (error) => {
+                this.apiError(error);
+                if (success) {
+                    success("");
+                }
             });
     }
 

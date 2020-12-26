@@ -1,11 +1,12 @@
 import { BoxStatus } from './box-status';
-import { UpdateConsumer } from './update-consumer';
 import { DevicesMap, RulesMap } from './id-map';
 import { Rule } from './rule';
 import { AquaBoxService } from './aqua-box.service';
 import { Serializable, Serialize } from 'ts-serializer';
 import { UpdateEvent } from './update-event';
 import { WiFiInfo } from './wi-fi-info'
+import { PropertyUpdateEventConsumer } from './property-update-event-consumer';
+import { UpdateConsumer } from './update-consumer';
 
 export class AquaBoxConfiguration {
     public id: string = ""
@@ -22,7 +23,8 @@ export class AquaBoxConfiguration {
 @Serialize({ root: "configuration"})
 export class Aquabox extends Serializable{
 
-    private updateConsumer: UpdateConsumer;
+    private updateConsumer: PropertyUpdateEventConsumer;
+    private networkUpdateConsumer: UpdateConsumer;
     public id: string
     public devices: DevicesMap = new DevicesMap()
     public rules: RulesMap = new RulesMap()
@@ -34,8 +36,20 @@ export class Aquabox extends Serializable{
                        public configuration: AquaBoxConfiguration) {
         super();
         this.id = this.configuration.id;
-        this.updateConsumer = new UpdateConsumer(this.service, UpdateEvent.Aquabox, this.id, this.id);
-        this.updateConsumer.subscribe(this);
+        this.updateConsumer = new PropertyUpdateEventConsumer(this.service, this);
+        this.updateConsumer.setBoxFilter(this.id);
+        this.updateConsumer.setEventClassFilter(UpdateEvent.Aquabox);
+        this.updateConsumer.setSenderFilter(this.id);
+        this.updateConsumer.subscribe();
+
+        this.networkUpdateConsumer = new UpdateConsumer(this.service)
+        this.networkUpdateConsumer.setBoxFilter(this.id);
+        this.networkUpdateConsumer.setSenderFilter(configuration.serial);
+        this.networkUpdateConsumer.setEventClassFilter(UpdateEvent.Network);
+        this.networkUpdateConsumer.setEventHandler((event: UpdateEvent) => {
+            this.getStatus();
+        });
+        this.networkUpdateConsumer.subscribe();
         this.getStatus();
     }
 
@@ -87,5 +101,9 @@ export class Aquabox extends Serializable{
 
     getNetworks(success ?: (result: WiFiInfo[]) => void) {
         this.service.getNetworks(this, success);
+    }
+
+    connectToWifi(network: WiFiInfo, success ?: (uuid: string) => void) {
+        this.service.connectToWifi(this, network, success);
     }
 }
