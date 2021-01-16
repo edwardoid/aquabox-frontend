@@ -30,6 +30,7 @@ export class Aquabox extends Serializable{
     public rules: RulesMap = new RulesMap()
     public internal: Object =  new Object()
     public connected: boolean
+    public cloudAvailable: boolean
     public status: BoxStatus
 
     public constructor(public service: AquaBoxService,

@@ -2,7 +2,6 @@ import { UpdateEvent } from './../update-event';
 import { HostsMap, DevicesMap } from './../id-map';
 import { AquaBoxService } from './../aqua-box.service';
 import { Component, OnInit } from '@angular/core';
-import { Device } from '../device';
 import { LoadingController, NavController, AlertController } from '@ionic/angular';
 import { Aquabox } from '../aquabox';
 import { ActivatedRoute } from '@angular/router';
@@ -50,63 +49,6 @@ export class DevicesPage implements OnInit {
     }
 
     ngOnInit() {
-    }
-
-    openRules(dev: Device) {
-        this.navi.navigateForward("/rules/" + this.box.configuration.id + "/" + dev.id);
-    }
-
-    async toggleDeviceIfRulesAreDisabled(dev: Device) {
-        if (dev.rulesEnabled) {
-            dev.isOn = !dev.isOn;
-            const alert = await this.alertController.create({
-                header: "Disable applying rules",
-                message: "Device <strong>" + dev.name + "</strong> is enabled for rules. " +
-                    "To control it manually applying rules on it must be disabled. " +
-                    "Do you want to disable rules on <strong>" + dev.name + "</strong>",
-                buttons: [
-                    {
-                        text: 'Cancel',
-                        role: 'cancel',
-                        cssClass: 'secondary',
-                        handler: () => {
-                        }
-                    },
-                    {
-                        text: 'Okay',
-                        handler: () => {
-                            dev.rulesEnabled = false;
-                            dev.update((ok: boolean) => {
-                                dev.rulesEnabled = !ok;
-                                this.toggleDevice(dev);
-                            });
-                        }
-                    }
-                ]
-            });
-
-            await alert.present();
-        } else {
-            this.toggleDevice(dev);
-        }
-    }
-
-    setupDevice(dev) {
-        this.navi.navigateForward("/device-setup/" + this.box.configuration.id + "/" + dev.id);
-    }
-
-    enableRulesOn(dev) {
-        dev.rulesEnabled = true;
-        dev.update((ok: boolean) => {
-            dev.rulesEnabled = ok;
-        });
-    }
-
-    toggleDevice(dev: Device) {
-        if (dev.isOn)
-            dev.turnOff();
-        else
-            dev.turnOn();
     }
 
     async getDevices(event) {

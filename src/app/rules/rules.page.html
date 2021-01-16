@@ -4,7 +4,7 @@
       <ion-menu-button></ion-menu-button>
     </ion-buttons>
     <ion-title>
-      {{device.name}} ({{device.id}})
+      {{device?.name}} ({{device?.id}})
     </ion-title>
   </ion-toolbar>
 </ion-header>
@@ -30,15 +30,15 @@
 
       <ion-card-content>
         <ion-item class="actionItem" *ngFor="let action of rule.actions">
-          <ion-text class="{{action.type}}" align-self-center>
-            <h1>{{action.type == "turn_on" ? "Turn on" : "Turn off"}}</h1>
+          <ion-text class="{{action.value == 1 ? 'turn_on' : 'turn_off'}}" align-self-center>
+            <h1>{{action.value == 1 ? "Turn on" : "Turn off"}}</h1>
           </ion-text>
 
           <ion-text class="textWithSpacing" align-self-center>
-            <h1>at {{ action.at | date:'HH:mm' }}</h1>
+            <h1> at {{ action.when | date:'HH:mm' }}</h1>
           </ion-text>
         </ion-item>
-        <ion-label *ngIf="rule.repeat.deleteAfter > 0" color="dark">Will expire on {{remain(rule.repeat)}}</ion-label>
+        <ion-label *ngIf="rule.delete_after > 0" color="dark">Will expire on {{remain(rule.delete_after)}}</ion-label>
       </ion-card-content>
     </ion-card>
   </ion-list>

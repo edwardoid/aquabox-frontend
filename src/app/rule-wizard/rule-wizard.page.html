@@ -34,8 +34,8 @@
       <ion-col>
         <ion-list @listItemState *ngFor="let action of rule?.actions; let i = index">
           <ion-item class="no-padding">
-            <ion-button color="{{action.type == 'turn_off' ? 'danger' : 'success'}}" class="action-button"
-              (click)="action.toggleActionType()">{{action?.name()}}</ion-button>
+            <ion-button color="{{action.value == 0 ? 'danger' : 'success'}}" class="action-button"
+              (click)="action.value = action.value == 1 ? 0 : 1">{{actionName(action.value)}}</ion-button>
             <ion-text>at</ion-text>
             <ion-button class="no-padding action-button" color="warning">
               <ion-datetime class="no-padding" displayFormat="HH:mm" placeholder="Select time" [(ngModel)]="dates[i]">
@@ -117,7 +117,7 @@
               <ion-radio value="times"></ion-radio>
               <ion-text>Only</ion-text>
               <div style="width: 2rem">
-                <ion-input type="number" value="{{rule?.repeat.deleteAfter}}" min="2" max="10000000"></ion-input>
+                <ion-input type="number" value="{{rule?.delete_after}}" min="2" max="10000000"></ion-input>
               </div>
               <ion-text>times</ion-text>
             </ion-item>

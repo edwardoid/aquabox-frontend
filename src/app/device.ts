@@ -1,4 +1,3 @@
-import { ActionType } from './actiontype';
 import { AquaBoxService } from './aqua-box.service';
 import { Aquabox } from './aquabox';
 import { Serialize, Serializable, SerializeProperty } from 'ts-serializer';
@@ -69,11 +68,11 @@ export class Device extends Serializable {
     }
 
     turnOn(success ?: (ok : boolean) => void) {
-        this.service.controlDevice(this, this.box, ActionType.TurnOn, success);
+        this.service.controlDevice(this, this.box, "turn_on", success);
     }
 
     turnOff(success ?: (ok : boolean) => void) {
-        this.service.controlDevice(this, this.box, ActionType.TurnOff, success);
+        this.service.controlDevice(this, this.box, "turn_off", success);
     }
 
     update(success ?: (ok : boolean) => void) {

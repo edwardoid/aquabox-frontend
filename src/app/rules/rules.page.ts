@@ -1,5 +1,3 @@
-import { RepeatTimeout } from './../repeattimeoutunit';
-import { Action } from './../action';
 import { UpdateEvent } from './../update-event';
 import { Rule } from './../rule';
 import { HostsMap, RulesMap } from './../id-map';
@@ -10,8 +8,7 @@ import { Device } from '../device';
 import { ActivatedRoute } from '@angular/router';
 import { Aquabox } from '../aquabox';
 import { trigger, style, transition, animate } from "@angular/animations"
-import { ActionType } from '../actiontype';
-import { Repeat } from '../repeat';
+import { ValueChange } from '../valuechange';
 
 @Component({
   selector: 'app-rules',
@@ -89,8 +86,8 @@ export class RulesPage implements OnInit {
     }, 1000);
   }
 
-  remain(repeat: Repeat) {
-    let n = ((repeat.deleteAfter- this.now) / 1000) % 3600;
+  remain(when: number) {
+    let n = ((when- this.now) / 1000) % 3600;
     let mins = Math.ceil(n / 60);
     let seconds = Math.ceil(n % 60);
     if (mins > 0)
@@ -114,19 +111,20 @@ export class RulesPage implements OnInit {
     let rule = new Rule(this.box);
     rule.name = "Toggle in " + timeoutInMinutes + " minutes."
     rule.generateId();
-    let first = new Action();
-    first.at = Date.now();
-    first.type = this.device.isOn ? ActionType.TurnOff : ActionType.TurnOn;
+    let first = new ValueChange();
+    first.property = "on"
+    first.when = Date.now();
+    first.value = this.device.isOn ? 0 : 1;
 
-    let second = new Action();
-    second.at = Date.now() + 60000 * timeoutInMinutes;
-    second.type = this.device.isOn ? ActionType.TurnOn : ActionType.TurnOff;
+    let second = new ValueChange();
+    second.property = "on";
+    second.value = this.device.isOn ? 1 : 0
+    second.when = Date.now() + 60000 * timeoutInMinutes;
 
     rule.device = this.device.id;
-    rule.repeat.unit = RepeatTimeout.Hour;
-    rule.repeat.deleteAfter = second.at + 1000;
+    rule.delete_after = second.when + 1000;
     rule.created_at = Date.now();
-    rule.lastRun = Date.now();
+    rule.last_run = Date.now();
     rule.actions = [ first, second ];
 
     rule.save();

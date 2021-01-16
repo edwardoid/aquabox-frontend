@@ -1,6 +1,5 @@
 import { DevicesMap, HostsMap, RulesMap } from './../id-map';
 import { ActivatedRoute } from '@angular/router';
-import { ActionType } from './../actiontype';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import {
   trigger,
@@ -11,8 +10,8 @@ import {
 import { AlertController, IonButton, NavController } from '@ionic/angular';
 import { Rule } from '../rule';
 import { AquaBoxService } from '../aqua-box.service';
-import { Action } from '../action';
 import { Aquabox } from '../aquabox';
+import { ValueChange } from '../valuechange';
 
 @Component({
   selector: 'app-rule-wizard',
@@ -97,10 +96,11 @@ export class RuleWizardPage implements OnInit {
   }
 
   addAction() {
-    let type = ActionType.TurnOn;
+    let vt = new ValueChange("on");
+    vt.value = 1;
 
-    if (this.rule.actions.length != 0 && this.rule.actions[this.rule.actions.length - 1].type == ActionType.TurnOn) {
-      type = ActionType.TurnOff;
+    if (this.rule.actions.length != 0 && this.rule.actions[this.rule.actions.length - 1].value == 1) {
+      vt.value = 0;
     }
 
     var nextDate = new Date(Date.now());
@@ -108,7 +108,7 @@ export class RuleWizardPage implements OnInit {
       nextDate = new Date(Date.parse(this.dates[this.dates.length - 1]) + 600 * 1000);
     }
     this.dates.push(nextDate.toISOString());
-    this.rule.actions.push(new Action(type))
+    this.rule.actions.push(vt)
     this.doneButton.disabled = this.rule.actions.length == 0 || this.rule.name.length == 0;
   }
 
@@ -131,7 +131,7 @@ export class RuleWizardPage implements OnInit {
   save() {
     this.rule.enabled = this.enableRule
     for (let i in this.rule.actions) {
-      this.rule.actions[i].at = Date.parse(this.dates[i]);
+      this.rule.actions[i].when = Date.parse(this.dates[i]);
     }
     if (this.rule.id == "-1") {
       this.rule.generateId();
@@ -145,5 +145,12 @@ export class RuleWizardPage implements OnInit {
         return;
       }
     });
+  }
+
+  actionName(value: number) {
+    if (value == 0) {
+      return "Turn off"
+    }
+    return "Turn on"
   }
 }

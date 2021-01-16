@@ -1,34 +1,8 @@
-import { Action } from './action';
 import { Aquabox } from './aquabox';
-import { Repeat } from './repeat';
 import { Serialize, SerializeProperty, Serializable } from 'ts-serializer';
 import { UpdateEvent } from './update-event';
 import { PropertyUpdateEventConsumer } from './property-update-event-consumer';
-
-/*
-{
-    "id" : "1",
-    "enabled" : true,
-    "device" : "dev1",
-    "index" : 0,
-    "lastRun" : 0,
-    "actions": [
-        {
-            "type" : "turn_on",
-            "at" : 1030
-        },
-        {
-            "type" : "turn_off",
-            "at" : 1830
-        }
-    ],
-    "created_at": 125,
-    "repeat": {
-        "count" : 175,
-        "unit" : "day"
-    }
-}
-*/
+import { ValueChange } from './valuechange';
 
 @Serialize({})
 export class Rule extends Serializable {
@@ -50,15 +24,16 @@ export class Rule extends Serializable {
     index: number = 0;
 
     @SerializeProperty({})
-    lastRun: number = 0;
+    last_run: number = 0;
+
+    @SerializeProperty({})
+    delete_after: number = 0;
 
     @SerializeProperty({ list: true })
-    actions: Action[] = [];
+    actions: ValueChange[] = [];
 
     @SerializeProperty({})
     created_at: number = 0;
-    @SerializeProperty({ type: Repeat })
-    repeat: Repeat = new Repeat();
 
     constructor(private box: Aquabox) {
         super()

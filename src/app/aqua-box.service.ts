@@ -1,7 +1,6 @@
 import { UpdateEvent } from './update-event';
 import { Md5 } from 'ts-md5/dist/md5';
 import { ToastController } from '@ionic/angular';
-import { ActionType } from './actiontype';
 import { DevicesMap, RulesMap, HostsMap } from './id-map';
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { Storage } from '@ionic/storage';
@@ -19,7 +18,7 @@ import { WiFiInfo } from './wi-fi-info'
 export class AquaBoxService {
 
     public APP = "5e0934b3d80b3932ea8cc095";
-    public APP_SERVER = "edwardoid.redirectme.net";
+    public APP_SERVER = "aquabox.me";
     public hosts: HostsMap = undefined;
     public ws: Map<string /* url */, WebSocket> = new Map<string, WebSocket>();
 
@@ -287,7 +286,7 @@ export class AquaBoxService {
             });
     }
 
-    controlDevice(dev: Device, box: Aquabox, action: ActionType, success?: (result: boolean) => void) {
+    controlDevice(dev: Device, box: Aquabox, action: string, success?: (result: boolean) => void) {
 
         this.http.put<Object>(this.baseUrl(box) + "device/" + dev.id + "/" + action, {}, { headers: this.headers(box) })
             .subscribe((response) => {
