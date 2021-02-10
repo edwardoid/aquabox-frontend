@@ -38,7 +38,7 @@ export class Device extends Serializable {
     @SerializeProperty({})
     type: string;
 
-    @SerializeProperty({})
+    @SerializeProperty({ map: "rules_enabled" })
     rulesEnabled: boolean;
 
     @SerializeProperty({})
