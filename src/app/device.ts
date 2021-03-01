@@ -22,14 +22,14 @@ export class Device extends Serializable {
     @SerializeProperty({})
     address: string;
 
-    @SerializeProperty({})
+    @SerializeProperty({ map: "on" })
     isOn: boolean
 
-    @SerializeProperty({})
-    value: number
+    @SerializeProperty({ map: "measurement" })
+    measurement: number
 
     round(precition: number) {
-        return Math.round(Math.pow(10, precition) * this.value) / Math.pow(10, precition); 
+        return Math.round(Math.pow(10, precition) * this.measurement) / Math.pow(10, precition); 
     }
 
     @SerializeProperty({ map: "class"})
@@ -68,11 +68,11 @@ export class Device extends Serializable {
     }
 
     turnOn(success ?: (ok : boolean) => void) {
-        this.service.controlDevice(this, this.box, "turn_on", success);
+        this.service.controlDevice(this, this.box, "on", 1, success);
     }
 
     turnOff(success ?: (ok : boolean) => void) {
-        this.service.controlDevice(this, this.box, "turn_off", success);
+        this.service.controlDevice(this, this.box, "on", 0, success);
     }
 
     update(success ?: (ok : boolean) => void) {

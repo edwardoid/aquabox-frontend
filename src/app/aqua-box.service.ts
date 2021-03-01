@@ -286,9 +286,15 @@ export class AquaBoxService {
             });
     }
 
-    controlDevice(dev: Device, box: Aquabox, action: string, success?: (result: boolean) => void) {
+    controlDevice(dev: Device, box: Aquabox, property: string, value: any, success?: (result: boolean) => void) {
 
-        this.http.put<Object>(this.baseUrl(box) + "device/" + dev.id + "/" + action, {}, { headers: this.headers(box) })
+        let changes = JSON.stringify({
+            "changes": [
+                { "property" : property,
+                  "value" : value
+                }
+            ]});
+        this.http.put<Object>(this.baseUrl(box) + "device/" + dev.id + "/set", changes, { headers: this.headers(box) })
             .subscribe((response) => {
                 dev.deserialize(response);
                 if (success) success(true);

@@ -130,6 +130,7 @@ export class RuleWizardPage implements OnInit {
 
   save() {
     this.rule.enabled = this.enableRule
+    this.rule.created_at = Date.now();
     for (let i in this.rule.actions) {
       this.rule.actions[i].when = Date.parse(this.dates[i]);
     }
