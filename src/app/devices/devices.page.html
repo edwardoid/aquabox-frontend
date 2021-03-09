@@ -41,6 +41,7 @@
     </ion-card>
     <ion-list *ngFor="let dev of this?.devices">
         <app-relay [dev]="dev" [box]="box.configuration.id"></app-relay>
+        <app-step [dev]="dev" [box]="box.configuration.id"></app-step>
     </ion-list>
 
 </ion-content>

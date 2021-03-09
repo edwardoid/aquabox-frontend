@@ -25,6 +25,9 @@ export class Device extends Serializable {
     @SerializeProperty({ map: "on" })
     isOn: boolean
 
+    @SerializeProperty({ map: "times" })
+    times: number
+
     @SerializeProperty({ map: "measurement" })
     measurement: number
 
@@ -73,6 +76,10 @@ export class Device extends Serializable {
 
     turnOff(success ?: (ok : boolean) => void) {
         this.service.controlDevice(this, this.box, "on", 0, success);
+    }
+
+    setValue(property: string, value: any, success ?: (ok : boolean) => void) {
+        this.service.controlDevice(this, this.box, property, value, success);
     }
 
     update(success ?: (ok : boolean) => void) {

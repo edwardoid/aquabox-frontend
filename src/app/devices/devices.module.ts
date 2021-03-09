@@ -7,6 +7,7 @@ import { RouterModule } from '@angular/router';
 import { DevicesPage } from './devices.page';
 import { HttpClientModule } from '@angular/common/http';
 import { RelayComponent } from '../components/relay/relay.component';
+import { StepComponent } from '../components/step/step.component';
 
 @NgModule({
   imports: [
@@ -21,6 +22,6 @@ import { RelayComponent } from '../components/relay/relay.component';
     ]),
     HttpClientModule,
   ],
-  declarations: [DevicesPage, RelayComponent]
+  declarations: [DevicesPage, RelayComponent, StepComponent]
 })
 export class DevicesPageModule {}

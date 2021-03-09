@@ -21,41 +21,6 @@ export class StepComponent implements OnInit {
 
   ngOnInit() { }
 
-  async toggleDeviceIfRulesAreDisabled(dev: Device) {
-    if (dev.rulesEnabled) {
-      dev.isOn = !dev.isOn;
-      const alert = await this.alertController.create({
-        header: "Disable applying rules",
-        message: "Device <strong>" + dev.name + "</strong> is enabled for rules. " +
-          "To control it manually applying rules on it must be disabled. " +
-          "Do you want to disable rules on <strong>" + dev.name + "</strong>",
-        buttons: [
-          {
-            text: 'Cancel',
-            role: 'cancel',
-            cssClass: 'secondary',
-            handler: () => {
-            }
-          },
-          {
-            text: 'Okay',
-            handler: () => {
-              dev.rulesEnabled = false;
-              dev.update((ok: boolean) => {
-                dev.rulesEnabled = !ok;
-                this.toggleDevice(dev);
-              });
-            }
-          }
-        ]
-      });
-
-      await alert.present();
-    } else {
-      this.toggleDevice(dev);
-    }
-  }
-
   enableRulesOn(dev) {
     dev.rulesEnabled = true;
     dev.update((ok: boolean) => {
@@ -63,11 +28,8 @@ export class StepComponent implements OnInit {
     });
   }
 
-  toggleDevice(dev: Device) {
-    if (dev.isOn)
-      dev.turnOff();
-    else
-      dev.turnOn();
+  setSteps(dev: Device, count: number) {
+    dev.setValue("times", count)
   }
   openRules(dev: Device) {
     this.navi.navigateForward("/rules/" + this.box + "/" + this.dev.id);

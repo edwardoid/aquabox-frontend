@@ -1,21 +1,22 @@
-<ion-card id="card{{dev.id}}" class="relay-card" color="light"  *ngIf="dev.deviceClass == 'relay'">
+<ion-card id="card{{dev.id}}" class="step-card" color="light"  *ngIf="dev.deviceClass == 'step'">
   <ion-card-header>
       <ion-item>
           <ion-thumbnail slot="start">
               <img src="{{dev.image()}}" class="bg-white">
           </ion-thumbnail>
           <ion-col>
-              <ion-card-title>{{dev.name}}</ion-card-title>
+              <ion-card-title>{{dev.name}}{{dev.times}}</ion-card-title>
               <ion-card-subtitle>{{tr.deviceType(dev.type)}}</ion-card-subtitle>
           </ion-col>
-          <ion-toggle (click)="toggleDeviceIfRulesAreDisabled(dev)" [(ngModel)]="dev.isOn" slot="end">
-          </ion-toggle>
+          <ion-button color="step-one" *ngIf="dev.times == 0" (click)="setSteps(dev, 1)">Feed 1x</ion-button>
+          <ion-button color="step-two" *ngIf="dev.times == 0" (click)="setSteps(dev, 2)">Feed 2x</ion-button>
+          <ion-button color="step-three" *ngIf="dev.times == 0" (click)="setSteps(dev, 3)">Feed 3x</ion-button>
+          <ion-button color="danger" *ngIf="dev.times != 0" (click)="setSteps(dev, 0)">Stop</ion-button>
       </ion-item>
   </ion-card-header>
 
   <ion-card-content>
-      <ion-icon name="power" slot="icon-only" color="{{dev.isOn ? 'success' : 'danger'}}" size="large">
-      </ion-icon>
+      <ion-spinner name="dots" color="step-active"></ion-spinner>
       <ion-button class="rules-settings" fill="clear" style="float: right;" (click)='openRules(dev);'>
           <ion-icon name="alarm" slot="icon-only"></ion-icon>
       </ion-button>
@@ -26,5 +27,6 @@
       <ion-button *ngIf="!dev.rulesEnabled" (click)="enableRulesOn(dev)" class="device_icon" fill="outline" style="float: right;" size="small">
           Enable rules
       </ion-button>
+      <ion-progress-bar color="step-progress" value="0.5"></ion-progress-bar>
   </ion-card-content>
 </ion-card>
