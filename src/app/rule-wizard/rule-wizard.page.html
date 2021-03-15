@@ -34,8 +34,8 @@
       <ion-col>
         <ion-list @listItemState *ngFor="let action of rule?.actions; let i = index">
           <ion-item class="no-padding">
-            <ion-button color="{{action.value == 0 ? 'danger' : 'success'}}" class="action-button"
-              (click)="action.value = action.value == 1 ? 0 : 1">{{actionName(action.value)}}</ion-button>
+            <app-relay-action [change]="action" [idx]="i" [editable]="true" *ngIf="devClass === 'relay'" ></app-relay-action>
+            <app-step-action [change]="action" [idx]="i" [editable]="true" *ngIf="devClass === 'step'" ></app-step-action>
             <ion-text>at</ion-text>
             <ion-button class="no-padding action-button" color="warning">
               <ion-datetime class="no-padding" displayFormat="HH:mm" placeholder="Select time" [(ngModel)]="dates[i]">

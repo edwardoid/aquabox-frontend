@@ -7,11 +7,6 @@
     color: #383a3e
 }
 
-.turn_on {
-    @extend .textWithSpacing;
-    color: var(--ion-color-success);
-}
-
 .transparentItem {
     --background: "transparent"
 }
@@ -22,11 +17,6 @@
 
 .actionItem {
     @extend .transparentItem
-}
-
-.turn_off {
-    @extend .textWithSpacing;
-    color: var(--ion-color-danger);
 }
 
 ion-fab-button[color="danger"]::after {

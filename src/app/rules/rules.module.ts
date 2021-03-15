@@ -5,6 +5,7 @@ import { IonicModule } from '@ionic/angular';
 import { RouterModule } from '@angular/router';
 
 import { RulesPage } from './rules.page';
+import { ComponentsModule } from '../components/components.module';
 
 @NgModule({
   imports: [
@@ -16,7 +17,8 @@ import { RulesPage } from './rules.page';
         path: '',
         component: RulesPage
       }
-    ])
+    ]),
+    ComponentsModule
   ],
   declarations: [RulesPage]
 })

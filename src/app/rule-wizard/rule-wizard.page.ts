@@ -40,6 +40,7 @@ export class RuleWizardPage implements OnInit {
   devices: any = []
   dates: any[] = []
   enableRule: boolean = true
+  devClass: string = ""
 
   @ViewChild('doneButton') doneButton: IonButton;
 
@@ -85,6 +86,10 @@ export class RuleWizardPage implements OnInit {
             this.rule.device = devId;
             this.doneButton.disabled = this.rule.actions.length == 0 || this.rule.name.length == 0;
           }
+
+          if (dev.id == devId) {
+            this.devClass = dev.deviceClass
+          }
         }
       });
     });
@@ -96,12 +101,8 @@ export class RuleWizardPage implements OnInit {
   }
 
   addAction() {
-    let vt = new ValueChange("on");
-    vt.value = 1;
-
-    if (this.rule.actions.length != 0 && this.rule.actions[this.rule.actions.length - 1].value == 1) {
-      vt.value = 0;
-    }
+    let vt = new ValueChange();
+    vt.value = -1;
 
     var nextDate = new Date(Date.now());
     if (this.dates.length > 0) {
@@ -146,12 +147,5 @@ export class RuleWizardPage implements OnInit {
         return;
       }
     });
-  }
-
-  actionName(value: number) {
-    if (value == 0) {
-      return "Turn off"
-    }
-    return "Turn on"
   }
 }

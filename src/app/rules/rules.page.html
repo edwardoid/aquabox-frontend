@@ -30,9 +30,8 @@
 
       <ion-card-content>
         <ion-item class="actionItem" *ngFor="let action of rule.actions">
-          <ion-text class="{{action.value == 1 ? 'turn_on' : 'turn_off'}}" align-self-center>
-            <h1>{{action.value == 1 ? "Turn on" : "Turn off"}}</h1>
-          </ion-text>
+          <app-relay-action [change]="action" [editable]="false" *ngIf="device.deviceClass === 'relay'" ></app-relay-action>
+          <app-step-action [change]="action" [editable]="false" *ngIf="device.deviceClass === 'step'" ></app-step-action>
 
           <ion-text class="textWithSpacing" align-self-center>
             <h1> at {{ action.when | date:'HH:mm' }}</h1>
@@ -45,7 +44,7 @@
 
 
 
-  <ion-fab vertical="bottom" horizontal="end">
+  <ion-fab *ngIf="device && device?.deviceClass == 'relay'" vertical="bottom" horizontal="end">
     <ion-fab-button color="success">
       <ion-icon name="add"></ion-icon>
     </ion-fab-button>
@@ -63,5 +62,11 @@
         <ion-icon name="alarm"></ion-icon>
       </ion-fab-button>
     </ion-fab-list>
+  </ion-fab>
+
+  <ion-fab *ngIf="device && device?.deviceClass != 'relay'" vertical="bottom" horizontal="end">
+    <ion-fab-button (click)="addNewRule()" color="success">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
   </ion-fab>
 </ion-content>

@@ -15,7 +15,9 @@
 
 <ion-content>
   <ion-list>
-    <ion-list-header>Device</ion-list-header>
+    <ion-list-header>
+      <h1>Device</h1>
+    </ion-list-header>
     <ion-item>
       <ion-label color="primary" stacked>Name</ion-label>
       <ion-input placeholder="Name of the device" [(ngModel)]="name"></ion-input>
@@ -23,14 +25,16 @@
     <ion-item>
       <ion-label color="primary" position="stacked">Type</ion-label>
       <ion-select okText="Okay" cancelText="Cancel" [(ngModel)]="type">
-        <ion-select-option value="{{devType}}" *ngFor="let devType of this?.availableDeviceTypes">{{this.tr.deviceType(devType)}}</ion-select-option>
+        <ion-select-option value="{{devType}}" *ngFor="let devType of this?.availableDeviceTypes">
+          {{this.tr.deviceType(devType)}}</ion-select-option>
       </ion-select>
     </ion-item>
 
     <ion-item>
       <ion-label color="primary" position="stacked">Vendor</ion-label>
       <ion-select value="other" okText="Okay" cancelText="Cancel" [(ngModel)]="vendor">
-        <ion-select-option value="{{vendorKey}}" *ngFor="let vendorKey of this?.availableVendors">{{this.tr.vendor(vendorKey)}}</ion-select-option>
+        <ion-select-option value="{{vendorKey}}" *ngFor="let vendorKey of this?.availableVendors">
+          {{this.tr.vendor(vendorKey)}}</ion-select-option>
       </ion-select>
     </ion-item>
     <ion-item>
