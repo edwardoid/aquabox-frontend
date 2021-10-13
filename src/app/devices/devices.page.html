@@ -37,11 +37,14 @@
                     </ion-item-divider>
                 </ion-row>
             </div>
+
+
         </ion-card-content>
     </ion-card>
-    <ion-list *ngFor="let dev of this?.devices">
-        <app-relay [dev]="dev" [box]="box.configuration.id"></app-relay>
-        <app-step [dev]="dev" [box]="box.configuration.id"></app-step>
+    <ion-list>
+        <ng-container #devicesList>
+
+        </ng-container>
     </ion-list>
 
 </ion-content>

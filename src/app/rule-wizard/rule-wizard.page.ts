@@ -133,7 +133,7 @@ export class RuleWizardPage implements OnInit {
     this.rule.enabled = this.enableRule
     this.rule.created_at = Date.now();
     for (let i in this.rule.actions) {
-      this.rule.actions[i].when = Date.parse(this.dates[i]);
+      //TODO: this.rule.actions[i].when = Date.parse(this.dates[i]);
     }
     if (this.rule.id == "-1") {
       this.rule.generateId();

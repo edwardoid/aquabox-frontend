@@ -1,7 +1,9 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { AlertController, NavController } from '@ionic/angular';
+import { AquaBoxService } from 'src/app/aqua-box.service';
 import { Aquabox } from 'src/app/aquabox';
 import { TranslatorService } from 'src/app/translator.service';
+import { UpdateEvent } from 'src/app/update-event';
 import { Device } from '../../device';
 
 
@@ -17,8 +19,22 @@ export class RelayComponent implements OnInit {
   constructor(
     private tr: TranslatorService,
     public alertController: AlertController,
-    private navi: NavController
-  ) { }
+    private navi: NavController,
+    private aquabox: AquaBoxService
+  ) {
+    this.aquabox.Updates.subscribe((event: UpdateEvent) => {
+      if (event.Box != this.box) {
+          return;
+      }
+      if (event.Class != UpdateEvent.Device) {
+          return;
+      }
+
+      if (this.dev.id === event.Sender) {
+        event.apply(this.dev)
+      }
+  });
+  }
 
   ngOnInit() { }
 

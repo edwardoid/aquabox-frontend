@@ -37,7 +37,8 @@
             <h1> at {{ action.when | date:'HH:mm' }}</h1>
           </ion-text>
         </ion-item>
-        <ion-label *ngIf="rule.delete_after > 0" color="dark">Will expire on {{remain(rule.delete_after)}}</ion-label>
+        <ion-label *ngIf="rule.delete_after > 0" color="dark">Will expire {{remain(rule)}}</ion-label>
+        <ion-progress-bar *ngIf="rule.delete_after > 0" value="{{progress(rule)}}" color="warning"></ion-progress-bar>
       </ion-card-content>
     </ion-card>
   </ion-list>

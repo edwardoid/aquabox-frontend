@@ -70,6 +70,8 @@ export class RulesPage implements OnInit {
         return;
       }
 
+      self.now = Date.now() / 1000;
+
       if (event.Data["action"] == "deleted") {
         self.rules.removeById(event.Sender);
       }
@@ -82,18 +84,30 @@ export class RulesPage implements OnInit {
     });
 
     setInterval(() => {
-      self.now = Date.now();
+      self.now = Date.now() / 1000;
     }, 1000);
   }
 
-  remain(when: number) {
-    let n = ((when- this.now) / 1000) % 3600;
-    let mins = Math.ceil(n / 60);
+  remain(rule: Rule) {
+    let r = (rule.created_at + rule.delete_after);
+    r -= this.now;
+    if (r < 2) {
+      return " now";
+    }
+    if (r < 3) {
+      return " very soon";
+    }
+    let n = r % 3600;
+    let mins = Math.floor(n / 60);
     let seconds = Math.ceil(n % 60);
     if (mins > 0)
-      return  mins + "m. " + seconds + "s.";
+      return "in " + mins + "m " + seconds + "s";
     else
-      return seconds + "s.";
+      return "in " + seconds + "s";
+  }
+
+  progress(rule: Rule) {
+    return 1 - (this.now - rule.created_at) / rule.delete_after
   }
 
   toggleEnabled(rule: Rule) {
@@ -108,23 +122,38 @@ export class RulesPage implements OnInit {
   }
 
   createTemporaryRule(timeoutInMinutes) {
+    let now = new Date();
+    let later = new Date(Date.now() + timeoutInMinutes * 60 * 1000);
+
     let rule = new Rule(this.box);
     rule.name = "Toggle in " + timeoutInMinutes + " minutes."
     rule.generateId();
     let first = new ValueChange();
     first.property = "on"
-    first.when = Date.now();
+    first.cron =  now.getSeconds() + " " +
+                  now.getMinutes() + " " +
+                  now.getHours() + " " +
+                  now.getDate() + " " +
+                  (now.getMonth() + 1) + " " +
+                  "* "
+    first.when = now.getTime();
     first.value = this.device.isOn ? 0 : 1;
 
     let second = new ValueChange();
     second.property = "on";
     second.value = this.device.isOn ? 1 : 0
-    second.when = Date.now() + 60000 * timeoutInMinutes;
+    second.cron = later.getSeconds() + " " +
+                  later.getMinutes() + " " +
+                  later.getHours() + " " +
+                  later.getDate() + " " +
+                  (later.getMonth() + 1) + " " +
+                  "*";
+    second.when = later.getTime();
 
     rule.device = this.device.id;
-    rule.delete_after = second.when + 1000;
-    rule.created_at = Date.now();
-    rule.last_run = Date.now();
+    rule.delete_after = timeoutInMinutes * 60 + 1;
+    rule.created_at = now.getTime() / 1000;
+    rule.last_run = now.getTime() / 1000;
     rule.actions = [ first, second ];
 
     rule.save();

@@ -7,10 +7,13 @@ export class ValueChange  extends Serializable {
     public property: string;
 
     @SerializeProperty({})
-    public when: number;
+    public cron: string;
 
     @SerializeProperty({})
     public value: number;
+
+    @SerializeProperty({})
+    public when: number;
 
     constructor(property?: string) {
         super();

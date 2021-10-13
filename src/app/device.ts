@@ -5,7 +5,7 @@ import { RulesMap } from './id-map';
 
 @Serialize({})
 export class Device extends Serializable {
-    
+
     constructor(private service: AquaBoxService, private box: Aquabox) {
         super();
     }
@@ -32,7 +32,7 @@ export class Device extends Serializable {
     measurement: number
 
     round(precition: number) {
-        return Math.round(Math.pow(10, precition) * this.measurement) / Math.pow(10, precition); 
+        return Math.round(Math.pow(10, precition) * this.measurement) / Math.pow(10, precition);
     }
 
     @SerializeProperty({ map: "class"})
@@ -44,6 +44,12 @@ export class Device extends Serializable {
     @SerializeProperty({ map: "rules_enabled" })
     rulesEnabled: boolean;
 
+    @SerializeProperty({ map: "accepted" })
+    accepted: boolean;
+
+    @SerializeProperty({ map: "available" })
+    available: boolean;
+
     @SerializeProperty({})
     meta: Map<string, string>;
 
@@ -53,7 +59,7 @@ export class Device extends Serializable {
     image() {
         let v = this.meta["vendor"];
         if (!v || v == "other") {
-            return "/assets/" + this.type + ".png";    
+            return "/assets/" + this.type + ".png";
         }
         return "/assets/" + this.meta["vendor"] + ".png";
     }
