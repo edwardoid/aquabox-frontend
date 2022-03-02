@@ -130,33 +130,42 @@ export class RulesPage implements OnInit {
     rule.generateId();
     let first = new ValueChange();
     first.property = "on"
-    first.cron =  now.getSeconds() + " " +
-                  now.getMinutes() + " " +
-                  now.getHours() + " " +
-                  now.getDate() + " " +
-                  (now.getMonth() + 1) + " " +
-                  "* "
-    first.when = now.getTime();
+    first.cron =  this.buildCron(now)
     first.value = this.device.isOn ? 0 : 1;
 
     let second = new ValueChange();
     second.property = "on";
     second.value = this.device.isOn ? 1 : 0
-    second.cron = later.getSeconds() + " " +
-                  later.getMinutes() + " " +
-                  later.getHours() + " " +
-                  later.getDate() + " " +
-                  (later.getMonth() + 1) + " " +
-                  "*";
-    second.when = later.getTime();
+    second.cron = this.buildCron(later);
 
     rule.device = this.device.id;
     rule.delete_after = timeoutInMinutes * 60 + 1;
     rule.created_at = now.getTime() / 1000;
     rule.last_run = now.getTime() / 1000;
+    rule.last_run -= rule.last_run % 100;
     rule.actions = [ first, second ];
 
     rule.save();
+  }
+
+  private buildCron(date: Date) {
+    return  [ date.getSeconds(),
+              date.getMinutes(),
+              date.getHours(),
+              date.getDate(),
+              (date.getMonth() + 1),
+              "*"].join(" ");
+  }
+
+  public explain(change) {
+    let tokens = change.cron.split(" ");
+    let sec = tokens[0];
+    sec = sec.length < 2 ? "0" + sec : sec;
+    let min = tokens[1];
+    min = min.length < 2 ? "0" + min : min;
+    let hr  = tokens[2];
+    hr = hr.length < 2 ? "0" + hr : hr;
+    return [hr, min].join(":")
   }
 
   async removeRule(rule: Rule) {

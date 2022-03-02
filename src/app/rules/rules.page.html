@@ -34,7 +34,7 @@
           <app-step-action [change]="action" [editable]="false" *ngIf="device.deviceClass === 'step'" ></app-step-action>
 
           <ion-text class="textWithSpacing" align-self-center>
-            <h1> at {{ action.when | date:'HH:mm' }}</h1>
+            <h1> at {{ explain(action) }}</h1>
           </ion-text>
         </ion-item>
         <ion-label *ngIf="rule.delete_after > 0" color="dark">Will expire {{remain(rule)}}</ion-label>

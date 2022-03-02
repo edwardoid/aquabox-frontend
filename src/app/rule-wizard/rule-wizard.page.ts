@@ -129,22 +129,22 @@ export class RuleWizardPage implements OnInit {
     this.dates.splice(indexes.to, 0, indexes.from);
   }
 
-  createCron(date) {
-    let d = new Date(date);
-    return  d.getSeconds() + " " +
-            d.getMinutes() + " " +
-            d.getHours() + " " +
-            d.getDate() + " " +
-            (d.getMonth() + 1) + " " +
-            "* "
+  private buildCron(d: Date) {
+    let date = new Date(d);
+    return  [ "0" /*date.getSeconds() */,
+              date.getMinutes(),
+              date.getHours(),
+              "*" /*date.getDate()*/,
+              "*" /*(date.getMonth() + 1)*/,
+              "*"].join(" ");
   }
 
   save() {
     this.rule.enabled = this.enableRule
     this.rule.created_at = Date.now();
+    this.rule.last_run = 0;
     for (let i in this.rule.actions) {
-      this.rule.actions[i].when = Date.parse(this.dates[i]);
-      this.rule.actions[i].cron =  this.createCron(this.dates[i]);
+      this.rule.actions[i].cron =  this.buildCron(this.dates[i]);
     }
     if (this.rule.id == "-1") {
       this.rule.generateId();

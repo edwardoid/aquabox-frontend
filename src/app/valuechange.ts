@@ -12,9 +12,6 @@ export class ValueChange  extends Serializable {
     @SerializeProperty({})
     public value: number;
 
-    @SerializeProperty({})
-    public when: number;
-
     constructor(property?: string) {
         super();
         this.property = property;
