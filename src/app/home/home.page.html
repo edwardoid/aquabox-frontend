@@ -23,8 +23,13 @@
             <ion-label>
               <h1>{{host.configuration.name}}</h1>
             </ion-label>
+            <ion-label>
+              <p *ngIf="host.connected == 1">via local network</p>
+              <p *ngIf="host.connected == 2">via cloud</p>
+              <p *ngIf="host.connected == 3">connected</p>
+            </ion-label>
           </ion-col>
-          <ion-col align-self-end size="2">
+          <ion-col align-self-end size="1">
             <ion-button (click)="openSettings(host)" fill="clear">
                 <ion-icon name="options" slot="icon-only"></ion-icon>
             </ion-button>

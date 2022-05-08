@@ -4,10 +4,10 @@ import { Serializable } from 'ts-serializer';
 import { AquaBoxService } from "./aqua-box.service";
 
 
-export class PropertyUpdateEventConsumer extends UpdateConsumer{
+export class PropertyUpdateEventConsumer extends UpdateConsumer {
     constructor(service: AquaBoxService, private target: Serializable, private starUpdateProcessorCb?: (update: object) => void) {
         super(service)
-    
+
         this.setEventHandler((event: UpdateEvent) => {
             if (!event.Properties["*"]) {
                 event.apply(this.target);

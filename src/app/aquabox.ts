@@ -20,21 +20,27 @@ export class AquaBoxConfiguration {
     public serial: string
 }
 
-@Serialize({ root: "configuration"})
-export class Aquabox extends Serializable{
+export enum ConnectionMethods {
+    Disconnected = 0,
+    LocalOnly = 1,
+    CloudOnly = 2,
+    Both = 3
+}
 
+@Serialize({ root: "configuration" })
+export class Aquabox extends Serializable {
     private updateConsumer: PropertyUpdateEventConsumer;
     private networkUpdateConsumer: UpdateConsumer;
     public id: string
     public devices: DevicesMap = new DevicesMap()
     public rules: RulesMap = new RulesMap()
-    public internal: Object =  new Object()
-    public connected: boolean
+    public internal: Object = new Object()
+    public connected: ConnectionMethods
     public cloudAvailable: boolean
     public status: BoxStatus
 
     public constructor(public service: AquaBoxService,
-                       public configuration: AquaBoxConfiguration) {
+        public configuration: AquaBoxConfiguration) {
         super();
         this.id = this.configuration.id;
         this.updateConsumer = new PropertyUpdateEventConsumer(this.service, this);
@@ -60,8 +66,7 @@ export class Aquabox extends Serializable{
             (devices: DevicesMap) => {
                 this.devices = devices;
                 success(this.devices);
-            },
-            fail
+            }
         )
     }
 
@@ -80,31 +85,31 @@ export class Aquabox extends Serializable{
         )
     }
 
-    updateRule(rule: Rule, success ?: (result: boolean) => void) {
+    updateRule(rule: Rule, success?: (result: boolean) => void) {
         this.service.updateRule(this, rule, true, success);
     }
 
-    createRule(rule: Rule, success ?: (result: boolean) => void) {
+    createRule(rule: Rule, success?: (result: boolean) => void) {
         this.service.updateRule(this, rule, false, success);
     }
 
-    deleteRule(rule: Rule, success ?: (result: boolean) => void) {
+    deleteRule(rule: Rule, success?: (result: boolean) => void) {
         this.service.deleteRule(this, rule, success);
     }
 
-    getStatus(success ?: (result: boolean) => void) {
+    getStatus(success?: (result: boolean) => void) {
         this.service.getStatus(this, success);
     }
 
-    scanForNetworks(success ?: (result: boolean) => void) {
+    scanForNetworks(success?: (result: boolean) => void) {
         this.service.scanForNetworks(this, success);
     }
 
-    getNetworks(success ?: (result: WiFiInfo[]) => void) {
+    getNetworks(success?: (result: WiFiInfo[]) => void) {
         this.service.getNetworks(this, success);
     }
 
-    connectToWifi(network: WiFiInfo, success ?: (uuid: string) => void) {
+    connectToWifi(network: WiFiInfo, success?: (uuid: string) => void) {
         this.service.connectToWifi(this, network, success);
     }
 }
