@@ -220,13 +220,12 @@ export class AquaBoxService {
         return this.baseUrlFromConfiguration(aquabox.configuration, cloud);
     }
 
-    private headers(aquabox: Aquabox): any {
-        return {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'boxId': aquabox.configuration.serial,
-            'appId': this.APP
-        };
+    private headers(aquabox: Aquabox): HttpHeaders {
+        return new HttpHeaders()
+            .append('Content-Type', 'application/json')
+            .append('Accept', 'application/json')
+            .append('boxId', aquabox.configuration.serial)
+            .append('appId', this.APP);
     }
 
     private async showMessage(text) {
@@ -300,7 +299,7 @@ export class AquaBoxService {
     }
 
     async fetchDevices(box: Aquabox, success: (devices: DevicesMap) => void, fail?: () => void) {
-        this.api(box).get("devices", { headers: this.headers(box) },
+        this.api(box).get("devices", this.headers(box),
             (box: Aquabox, data: Object) => {
                 this.parseDevices(box, data, success)
             }, (box: Aquabox, error) => {
@@ -311,7 +310,7 @@ export class AquaBoxService {
     }
 
     getDevice(device: Device, box: Aquabox, success?: () => void, fail?: () => void) {
-        this.api(box).get("device/" + device.id, { headers: this.headers(box) },
+        this.api(box).get("device/" + device.id, this.headers(box),
             (box: Aquabox, data: Object) => {
                 device.deserialize(data)
                 if (success) success();
@@ -331,7 +330,7 @@ export class AquaBoxService {
             ]
         });
 
-        this.api(box).put("device/" + dev.id + "/set", changes, { headers: this.headers(box) },
+        this.api(box).put("device/" + dev.id + "/set", changes, this.headers(box),
             (box: Aquabox, data: Object) => {
                 if (success) success(true);
             }, (box: Aquabox, error) => {
@@ -340,7 +339,7 @@ export class AquaBoxService {
     }
 
     fetchRules(box: Aquabox, success: (rules: RulesMap) => void, fail?: () => void) {
-        this.api(box).get("rules", { headers: this.headers(box) },
+        this.api(box).get("rules", this.headers(box),
             (box: Aquabox, data: Object) => {
                 this.parseRules(box, data, success)
             }, (box: Aquabox, error) => {
@@ -351,7 +350,7 @@ export class AquaBoxService {
     }
 
     fetchRulesForDevice(box: Aquabox, device: Device, success: (rules: RulesMap) => void, fail?: () => void) {
-        this.api(box).get("rules/" + device.id, { headers: this.headers(box) },
+        this.api(box).get("rules/" + device.id, this.headers(box),
             (box: Aquabox, data: Object) => {
                 this.parseRules(box, data, success)
             }, (box: Aquabox, error) => {
@@ -363,7 +362,7 @@ export class AquaBoxService {
 
     updateDevice(box: Aquabox, device: Device, result: (result: boolean) => void) {
 
-        this.api(box).post("device/" + device.id, JSON.stringify(device.serialize()), { headers: this.headers(box) },
+        this.api(box).post("device/" + device.id, JSON.stringify(device.serialize()), this.headers(box),
             (box: Aquabox, data: Object) => {
                 if (result) {
                     result(true);
@@ -383,7 +382,7 @@ export class AquaBoxService {
         let data = JSON.stringify(rule.serialize());
 
         if (update) {
-            this.api(box).post("device/" + rule.device + "/rule", data, { headers: this.headers(box) },
+            this.api(box).post("device/" + rule.device + "/rule", data, this.headers(box),
                 (box: Aquabox, data: Object) => {
                     if (result) {
                         result(true);
@@ -395,7 +394,7 @@ export class AquaBoxService {
                     }
                 });
         } else {
-            this.api(box).put("device/" + rule.device + "/rule", data, { headers: this.headers(box) },
+            this.api(box).put("device/" + rule.device + "/rule", data, this.headers(box),
                 (box: Aquabox, data: Object) => {
                     if (result) {
                         result(true);
@@ -411,7 +410,7 @@ export class AquaBoxService {
 
     deleteRule(box: Aquabox, rule: Rule, result: (result: boolean) => void) {
 
-        this.api(box).delete("rule/" + rule.id, { headers: this.headers(box) },
+        this.api(box).delete("rule/" + rule.id, this.headers(box),
             (box: Aquabox, data: Object) => {
                 if (result) {
                     result(true);
@@ -425,7 +424,7 @@ export class AquaBoxService {
     }
 
     getStatus(box: Aquabox, success?: (result: boolean) => void) {
-        this.api(box).get("status", { headers: this.headers(box) },
+        this.api(box).get("status", this.headers(box),
             (box: Aquabox, data: Object) => {
                 if (!box.status) {
                     box.status = new BoxStatus();
@@ -442,7 +441,7 @@ export class AquaBoxService {
     }
 
     scanForNetworks(box: Aquabox, success?: (result: boolean) => void) {
-        this.api(box).get("wifi/scan", { headers: this.headers(box) },
+        this.api(box).get("wifi/scan", this.headers(box),
             (box: Aquabox, data: Object) => {
                 if (success) {
                     success(true);
@@ -457,7 +456,7 @@ export class AquaBoxService {
     connectToWifi(box: Aquabox, wifi: WiFiInfo, success?: (uid: string) => void) {
         let network = JSON.stringify(wifi.serialize());
 
-        this.api(box).post("wifi/connect", network, { headers: this.headers(box) },
+        this.api(box).post("wifi/connect", network, this.headers(box),
             (box: Aquabox, data: Object) => {
                 if (data.hasOwnProperty("uuid")) {
                     success(data["uuid"].toString());
@@ -473,7 +472,7 @@ export class AquaBoxService {
     }
 
     getNetworks(box: Aquabox, success?: (result: WiFiInfo[]) => void) {
-        this.api(box).get("wifi/networks", { headers: this.headers(box) },
+        this.api(box).get("wifi/networks", this.headers(box),
             (box: Aquabox, data: Object) => {
                 let raw = data["networks"];
                 if (!Array.isArray(raw)) {

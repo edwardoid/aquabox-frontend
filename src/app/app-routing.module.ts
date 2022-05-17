@@ -12,6 +12,10 @@ const routes: Routes = [
     loadChildren: './home/home.module#HomePageModule'
   },
   {
+    path: 'version',
+    loadChildren: './version/version.module#VersionPageModule'
+  },
+  {
     path: 'devices/:box',
     loadChildren: './devices/devices.module#DevicesPageModule'
   },

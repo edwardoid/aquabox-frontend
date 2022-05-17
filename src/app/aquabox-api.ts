@@ -1,4 +1,4 @@
-import { HttpClient } from "@angular/common/http";
+import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { Aquabox, ConnectionMethods } from "./aquabox";
 
 
@@ -17,7 +17,7 @@ export class AquaboxAPI {
     }
 
     public get(url: string,
-        request: any,
+        request: HttpHeaders,
         response: (box: Aquabox, data: Object) => void,
         fail: (box: Aquabox, error: any) => void) {
         this.http.get<Object>(this.urls(url)[0], { headers: request })
@@ -35,7 +35,7 @@ export class AquaboxAPI {
     }
 
     public delete(url: string,
-        request: any,
+        request: HttpHeaders,
         response: (box: Aquabox, data: Object) => void,
         fail: (box: Aquabox, error: any) => void) {
         this.http.delete<Object>(this.urls(url)[0], { headers: request })
@@ -54,7 +54,7 @@ export class AquaboxAPI {
 
     public post(url: string,
         data: any,
-        request: any,
+        request: HttpHeaders,
         response: (box: Aquabox, data: Object) => void,
         fail: (box: Aquabox, error: any) => void) {
         this.http.post<Object>(this.urls(url)[0], data, { headers: request })
@@ -73,7 +73,7 @@ export class AquaboxAPI {
 
     public put(url: string,
         data: any,
-        request: any,
+        request: HttpHeaders,
         response: (box: Aquabox, data: Object) => void,
         fail: (box: Aquabox, error: any) => void) {
         this.http.put<Object>(this.urls(url)[0], data, { headers: request })
