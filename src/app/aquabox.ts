@@ -43,6 +43,7 @@ export class Aquabox extends Serializable {
         public configuration: AquaBoxConfiguration) {
         super();
         this.id = this.configuration.id;
+        this.status = new BoxStatus();
         this.updateConsumer = new PropertyUpdateEventConsumer(this.service, this);
         this.updateConsumer.setBoxFilter(this.id);
         this.updateConsumer.setEventClassFilter(UpdateEvent.Aquabox);
