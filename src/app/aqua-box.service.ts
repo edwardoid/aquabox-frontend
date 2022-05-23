@@ -244,6 +244,10 @@ export class AquaBoxService {
         let err = "Error on making API call " + error.url +
             "\nFailed with: " + error.statusText +
             "\nDetails: " + error.message;
+        if (error.status == 0) {
+            console.error(err);
+            return;
+        }
         this.showMessage(err);
     }
 

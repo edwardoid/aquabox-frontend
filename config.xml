@@ -5,6 +5,7 @@
     <author email="edward.sarkisyan@gmail.com" href="http://twitter.com/arsenovich">Eduard Sargsyan</author>
     <content src="index.html" />
     <access origin="*" />
+    <allow-navigation href="*"/>
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />
     <allow-intent href="tel:*" />
