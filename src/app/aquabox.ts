@@ -44,6 +44,7 @@ export class Aquabox extends Serializable {
         super();
         this.id = this.configuration.id;
         this.status = new BoxStatus();
+        this.status.available = false;
         this.updateConsumer = new PropertyUpdateEventConsumer(this.service, this);
         this.updateConsumer.setBoxFilter(this.id);
         this.updateConsumer.setEventClassFilter(UpdateEvent.Aquabox);
@@ -55,10 +56,14 @@ export class Aquabox extends Serializable {
         this.networkUpdateConsumer.setSenderFilter(configuration.serial);
         this.networkUpdateConsumer.setEventClassFilter(UpdateEvent.Network);
         this.networkUpdateConsumer.setEventHandler((event: UpdateEvent) => {
-            this.getStatus();
+            this.getStatus((ok: boolean) => {
+                this.status.available = ok;
+            });
         });
         this.networkUpdateConsumer.subscribe();
-        this.getStatus();
+        this.getStatus((ok: boolean) => {
+            this.status.available = ok;
+        });
     }
 
     async getDevices(success: (devices: DevicesMap) => void, fail?: () => void) {

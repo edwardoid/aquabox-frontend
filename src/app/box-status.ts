@@ -26,4 +26,6 @@ export class BoxStatus extends Serializable {
 
     @SerializeProperty({})
     stream: number
+
+    available: boolean
 }

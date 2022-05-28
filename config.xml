@@ -1,11 +1,11 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="com.sargsyan.devapp" version="0.1.56" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+<widget android-versionCode="1" id="com.sargsyan.devapp" version="1.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <name>Aquabox Devel</name>
     <description>Aquabox remote control</description>
     <author email="edward.sarkisyan@gmail.com" href="http://twitter.com/arsenovich">Eduard Sargsyan</author>
     <content src="index.html" />
     <access origin="*" />
-    <allow-navigation href="*"/>
+    <allow-navigation href="*" />
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />
     <allow-intent href="tel:*" />

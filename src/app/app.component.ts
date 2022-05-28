@@ -62,7 +62,7 @@ export class AppComponent {
             this.statusBar.show();
             this.splashScreen.hide();
 
-            const updateUrl = 'http://193.37.152.213:8081/android/aquabox-latest.xml';
+            const updateUrl = 'http://aquabox.me:8081/android/aquabox-latest.xml';
 
             if (!this.platform.is("desktop")) {
                 this.appUpdate.checkAppUpdate(updateUrl).then(update => {

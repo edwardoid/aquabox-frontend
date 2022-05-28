@@ -40,6 +40,7 @@ export class AquaBoxService {
         private storage: Storage) {
 
         storage.ready().finally(() => {
+            this.hosts = new HostsMap();
             this.fetchConfigurations();
         })
 
@@ -66,32 +67,25 @@ export class AquaBoxService {
         console.trace();
         let cfgs: AquaBoxConfiguration[] = [];
         for (let host of this.hosts) {
-            cfgs.push(host.configuration);
+            this.storage.set(host.id, host.configuration)
         }
-
-        this.storage.set("hosts", JSON.stringify(cfgs))
     }
 
     async fetchConfigurations(lazy?: (hosts: HostsMap) => void) {
-        await this.storage.get("hosts").then((hostsValue) => {
-            this.hosts = new HostsMap();
-            if (hostsValue == undefined) {
-                return;
+        await this.storage.keys().then((keys: string[]) => {
+            for (let id in keys) {
+                this.storage
+                .get(keys[id]).then((host) => {
+                    try {
+                        let cfg = <AquaBoxConfiguration>(host);
+                        let box = new Aquabox(this, cfg);
+                        this.hosts.insert(box);
+                    }
+                    catch(e) {
+                        console.error("Skipping key " + keys[id]);
+                    }
+                });
             }
-            let hosts = JSON.parse(hostsValue);
-
-            if (!Array.isArray(hosts)) {
-                return;
-            }
-
-            for (let i in hosts) {
-                let cfg: AquaBoxConfiguration = hosts[i]
-                let box = new Aquabox(this, cfg);
-                this.hosts.insert(box);
-            }
-
-            if (lazy)
-                lazy(this.hosts);
         });
     }
 
@@ -152,7 +146,9 @@ export class AquaBoxService {
             }
             this.Updates.emit(event);
 
-            box.getStatus(); // Update status if we have connection
+            box.getStatus((ok: boolean) => {
+                box.status.available = ok;
+            });
         }
 
         ws.onMessage = (box: Aquabox, message: any) => {
