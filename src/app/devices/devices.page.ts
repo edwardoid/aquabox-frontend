@@ -47,35 +47,41 @@ export class DevicesPage implements OnInit {
         });
 
         let self = this;
-        await loading.present().then(() => {
-            self.DevicesContainer.clear();
-            self.box.getDevices(
-                (devices: DevicesMap) => {
-                    loading.dismiss();
-                    for (let dev of devices) {
-                        let deviceComponent = null;
-                        if (dev.deviceClass == "relay") {
-                            deviceComponent = self.componentResolver.resolveComponentFactory(RelayComponent);
+	await loading.present().then(() => {
+	    try {
+        	self.DevicesContainer.clear();
+        	self.box.getDevices(
+                    (devices: DevicesMap) => {
+                        loading.dismiss();
+                        for (let dev of devices) {
+                           let deviceComponent = null;
+			   if (dev.deviceClass == "relay") {
+                               deviceComponent = self.componentResolver.resolveComponentFactory(RelayComponent);
+                           }
+                           else if (dev.deviceClass == "step") {
+                               deviceComponent = self.componentResolver.resolveComponentFactory(StepComponent);
+                           }
+                           var component = self.DevicesContainer.createComponent(deviceComponent);
+                           component.instance['box'] = self.box.id;
+                           component.instance['dev'] = dev;
                         }
-                        else if (dev.deviceClass == "step") {
-                            deviceComponent = self.componentResolver.resolveComponentFactory(StepComponent);
-                        }
-                        var component = self.DevicesContainer.createComponent(deviceComponent);
-                        component.instance['box'] = self.box.id;
-                        component.instance['dev'] = dev;
-                    }
 
-                    if (event) {
-                        event.target.complete();
+                        if (event) {
+                           event.target.complete();
+                        }
+                    },
+                    () => {
+                        loading.dismiss();
+                        if (event) {
+                           event.target.complete();
+                        }
                     }
-                },
-                () => {
-                    loading.dismiss();
-                    if (event) {
-                        event.target.complete();
-                    }
-                }
-            );
+		 );
+	   }
+	   catch(e) {
+               loading.dismiss();
+               this.navi.navigateRoot("/home");
+           }
         });
     }
 }
