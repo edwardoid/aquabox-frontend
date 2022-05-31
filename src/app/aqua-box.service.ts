@@ -153,7 +153,7 @@ export class AquaBoxService {
 
         ws.onMessage = (box: Aquabox, message: any) => {
             let event = new UpdateEvent();
-            event.deserialize(JSON.parse(message));
+            event.deserialize(message);
             event.Box = aquabox.id;
             this.Updates.emit(event);
         };
@@ -435,7 +435,7 @@ export class AquaBoxService {
                 }
             }, (box: Aquabox, error) => {
                 if (success) {
-                    success(false);
+                    success(error.status == 404);
                 }
             });
     }
