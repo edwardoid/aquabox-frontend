@@ -1,7 +1,7 @@
-import { Aquabox } from './aquabox';
+import { AquaboxInstance } from './aquabox-instance';
 
 describe('Aquabox', () => {
   it('should create an instance', () => {
-    expect(new Aquabox()).toBeTruthy();
+    expect(new AquaboxInstance()).toBeTruthy();
   });
 });

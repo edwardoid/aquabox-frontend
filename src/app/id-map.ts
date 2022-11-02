@@ -1,6 +1,6 @@
 import { Serializable, Serialize } from 'ts-serializer';
 import { Rule } from './rule';
-import { Aquabox } from './aquabox';
+import { AquaboxInstance } from './aquabox-instance';
 import { Device } from './device';
 
 @Serialize({ root : "internals" })
@@ -76,7 +76,7 @@ export class IdMap<T> extends Serializable implements Iterable<T> {
     }
 }
 
-export class HostsMap extends IdMap<Aquabox> {
+export class HostsMap extends IdMap<AquaboxInstance> {
     constructor() { super(); }
 }
 

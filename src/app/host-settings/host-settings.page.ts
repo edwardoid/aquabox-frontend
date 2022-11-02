@@ -1,4 +1,4 @@
-import { AquaBoxConfiguration, Aquabox } from './../aquabox';
+import { AquaBoxConfiguration, AquaboxInstance } from '../aquabox-instance';
 import { AquaBoxService } from './../aqua-box.service';
 import { ActivatedRoute } from '@angular/router';
 import { Component, OnInit, ViewChild, ElementRef, OnChanges, SimpleChanges } from '@angular/core';
@@ -13,7 +13,7 @@ import { NetworkStatus } from '../box-status';
 })
 export class HostSettingsPage implements OnInit {
   configuration: AquaBoxConfiguration = new AquaBoxConfiguration();
-  box: Aquabox = null;
+  box: AquaboxInstance = null;
   
   @ViewChild('qrCanvas')
   qrCanvas: ElementRef;

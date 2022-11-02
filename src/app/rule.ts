@@ -1,4 +1,4 @@
-import { Aquabox } from './aquabox';
+import { AquaboxInstance } from './aquabox-instance';
 import { Serialize, SerializeProperty, Serializable } from 'ts-serializer';
 import { UpdateEvent } from './update-event';
 import { PropertyUpdateEventConsumer } from './property-update-event-consumer';
@@ -35,7 +35,7 @@ export class Rule extends Serializable {
     @SerializeProperty({})
     created_at: number = 0;
 
-    constructor(private box: Aquabox) {
+    constructor(private box: AquaboxInstance) {
         super()
         this.updates = new PropertyUpdateEventConsumer(box.service, this);
         this.updates.setBoxFilter(box.id);

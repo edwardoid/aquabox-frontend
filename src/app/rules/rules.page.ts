@@ -6,7 +6,7 @@ import { AquaBoxService } from './../aqua-box.service';
 import { Component, OnInit } from '@angular/core';
 import { Device } from '../device';
 import { ActivatedRoute } from '@angular/router';
-import { Aquabox } from '../aquabox';
+import { AquaboxInstance } from '../aquabox-instance';
 import { trigger, style, transition, animate } from "@angular/animations"
 import { ValueChange } from '../valuechange';
 
@@ -32,7 +32,7 @@ import { ValueChange } from '../valuechange';
 })
 export class RulesPage implements OnInit {
 
-  private box: Aquabox;
+  private box: AquaboxInstance;
   public device: Device
   public rules: RulesMap;
   public now: number = Date.now();

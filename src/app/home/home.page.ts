@@ -1,4 +1,4 @@
-import { Aquabox } from './../aquabox';
+import { AquaboxInstance } from '../aquabox-instance';
 import { HostsMap } from './../id-map';
 import { AquaBoxService } from './../aqua-box.service';
 import { Component } from '@angular/core';
@@ -24,12 +24,12 @@ export class HomePage {
     this.nav.navigateForward("/add-new-host");
   }
 
-  gotoDevice(host: Aquabox) {
+  gotoDevice(host: AquaboxInstance) {
     if (host.connected)
       this.nav.navigateForward("/devices/" + host.id);
   }
 
-  openSettings(host: Aquabox) {
+  openSettings(host: AquaboxInstance) {
     this.nav.navigateForward("/settings/" + host.id);
   }
 }

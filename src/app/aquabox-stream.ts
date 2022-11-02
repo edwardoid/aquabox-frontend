@@ -1,18 +1,18 @@
 import { $WebSocket } from "angular2-websocket";
-import { Aquabox } from "./aquabox";
+import { AquaboxInstance } from "./aquabox-instance";
 import { UpdateEvent } from "./update-event";
 
 
 export class AquaboxStream {
-    public onConnected: (box: Aquabox, cloud: boolean, local: boolean) => void
-    public onMessage: (box: Aquabox, message: Object) => void;
+    public onConnected: (box: AquaboxInstance, cloud: boolean, local: boolean) => void
+    public onMessage: (box: AquaboxInstance, message: Object) => void;
 
     private local: $WebSocket;
     private localAvailable: boolean;
     private cloud: $WebSocket;
     private cloudAvailable: boolean;
 
-    constructor(private box: Aquabox,
+    constructor(private box: AquaboxInstance,
         private localUrl: string,
         private cloudUrl: string) {
         this.localAvailable = false;

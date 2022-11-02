@@ -1,5 +1,5 @@
 import { HostsMap } from './id-map';
-import { AquaBoxConfiguration, Aquabox } from './aquabox';
+import { AquaBoxConfiguration, AquaboxInstance } from './aquabox-instance';
 import { AquaBoxService } from './aqua-box.service';
 import { Component } from '@angular/core';
 

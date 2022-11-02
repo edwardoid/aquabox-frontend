@@ -3,7 +3,7 @@ import { WiFiInfo } from './../wi-fi-info';
 import { AquaBoxService } from './../aqua-box.service';
 import { ActivatedRoute } from '@angular/router';
 import { NavController, LoadingController, ModalController, IonButton, IonSlides } from '@ionic/angular';
-import { Aquabox } from './../aquabox';
+import { AquaboxInstance } from '../aquabox-instance';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { Security } from '../Security';
 
@@ -14,7 +14,7 @@ import { Security } from '../Security';
 })
 export class NetworkSetupPage implements OnInit {
 
-    box: Aquabox = null;
+    box: AquaboxInstance = null;
     networks: WiFiInfo[] = [];
     password: string
     selectedNetwork: WiFiInfo

@@ -10,7 +10,7 @@ import {
 import { AlertController, IonButton, NavController } from '@ionic/angular';
 import { Rule } from '../rule';
 import { AquaBoxService } from '../aqua-box.service';
-import { Aquabox } from '../aquabox';
+import { AquaboxInstance } from '../aquabox-instance';
 import { ValueChange } from '../valuechange';
 
 @Component({
@@ -36,7 +36,7 @@ import { ValueChange } from '../valuechange';
 export class RuleWizardPage implements OnInit {
 
   rule: Rule
-  box: Aquabox
+  box: AquaboxInstance
   devices: any = []
   dates: any[] = []
   enableRule: boolean = true

@@ -1,12 +1,12 @@
 import { AquaBoxService } from './aqua-box.service';
-import { Aquabox } from './aquabox';
+import { AquaboxInstance } from './aquabox-instance';
 import { Serialize, Serializable, SerializeProperty } from 'ts-serializer';
 import { RulesMap } from './id-map';
 
 @Serialize({})
 export class Device extends Serializable {
 
-    constructor(private service: AquaBoxService, private box: Aquabox) {
+    constructor(private service: AquaBoxService, private box: AquaboxInstance) {
         super();
     }
 
