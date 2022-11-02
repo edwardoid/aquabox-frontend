@@ -1,4 +1,4 @@
-import { AquaBoxConfiguration } from './../aquabox';
+import { AquaBoxConfiguration } from '../aquabox-instance';
 import { AquaBoxService } from './../aqua-box.service';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { NavController, IonSlides, IonButton } from '@ionic/angular';
@@ -99,6 +99,7 @@ export class AddNewHostPage implements OnInit {
                     this.configuration.serial = tokens[2];
                     this.configuration.name = tokens[3];
                     this.configuration.host = tokens[3];
+                    this.configuration.cloud = tokens[5] === "1";
 
                     for (let h of this.aquabox.hosts) {
                         if (h.configuration.host == this.configuration.host) {

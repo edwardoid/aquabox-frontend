@@ -11,25 +11,22 @@
 
 <ion-content class="main-background-gradient" [fullscreen]="true">
   <ion-list *ngFor="let host of aquabox.hosts">
-    <ion-card>
+    <ion-card disabled={{!host.status.available}}>
       <ion-card-header>
         <ion-row justify-content-start>
           <ion-col size="2">
             <ion-thumbnail>
-              <img src="assets/icon/package{{host.connected ? '' : '-grayscale'}}.png" />
+              <img src="assets/icon/package{{host.status.available ? '' : '-grayscale'}}.png" />
             </ion-thumbnail>
           </ion-col>
           <ion-col align-self-center  (click)="gotoDevice(host)" size="8">
             <ion-label>
               <h1>{{host.configuration.name}}</h1>
             </ion-label>
-            <ion-label *ngIf="host.status.available">
-              <p *ngIf="host.connected == 1">via local network</p>
-              <p *ngIf="host.connected == 2">via cloud</p>
-              <p *ngIf="host.connected == 3">connected</p>
-            </ion-label>
-            <ion-label *ngIf="!host.status.available && host.connected > 0">
-              <p *ngIf="host.connected == 1">Connected but not available</p>
+            <ion-label>
+              <p *ngIf="host.localAvailable && !host.cloudAvailable">via local network</p>
+              <p *ngIf="!host.localAvailable && host.cloudAvailable">via cloud</p>
+              <p *ngIf="host.localAvailable && host.cloudAvailable">connected</p>
             </ion-label>
           </ion-col>
           <ion-col align-self-end size="1">

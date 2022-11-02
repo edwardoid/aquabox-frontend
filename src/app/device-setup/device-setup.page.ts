@@ -3,7 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { AquaBoxService } from './../aqua-box.service';
 import { Device } from '../device';
 import { NavController, AlertController } from '@ionic/angular';
-import { Aquabox } from './../aquabox';
+import { AquaboxInstance } from '../aquabox-instance';
 import { Component, OnInit } from '@angular/core';
 import { TranslatorService } from '../translator.service';
 
@@ -14,7 +14,7 @@ import { TranslatorService } from '../translator.service';
 })
 export class DeviceSetupPage implements OnInit {
 
-  private box: Aquabox;
+  private box: AquaboxInstance
   public device: Device
   
   name: string = "Device"

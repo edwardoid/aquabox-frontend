@@ -1,5 +1,4 @@
 import { UpdateEvent } from './update-event';
-import { Md5 } from 'ts-md5/dist/md5';
 import { ToastController } from '@ionic/angular';
 import { DevicesMap, RulesMap, HostsMap } from './id-map';
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
@@ -7,31 +6,26 @@ import { Storage } from '@ionic/storage';
 import { Rule } from './rule';
 import { Injectable, EventEmitter, Self } from '@angular/core';
 import { Device } from './device';
-import { Aquabox, AquaBoxConfiguration, ConnectionMethods } from './aquabox';
+import { AquaboxInstance, AquaBoxConfiguration, ConnectionMethods } from './aquabox-instance';
 import { $WebSocket } from 'angular2-websocket/angular2-websocket';
 import { BoxStatus } from './box-status';
 import { WiFiInfo } from './wi-fi-info'
 import { AquaboxStream } from './aquabox-stream';
+import { AquaboxRPC } from './aquabox-rpc';
 import { AquaboxAPI } from './aquabox-api';
+import { RPCCommand } from './rpc-command';
 
 @Injectable({
     providedIn: 'root'
 })
 export class AquaBoxService {
-
-    static AquaboxConnection = class {
-        constructor(public box: Aquabox,
-            public updates: AquaboxStream,
-            public api: AquaboxAPI) {
-
-        }
-    }
-
     public APP = "5e0934b3d80b3932ea8cc095";
     public APP_SERVER = "aquabox.me";
     public hosts: HostsMap = undefined;
+    public cloud: AquaboxRPC = new AquaboxRPC("");
     public connections: Map<string, AquaboxStream> = new Map<string, AquaboxStream>()
     public apis: Map<string, AquaboxAPI> = new Map<string, AquaboxAPI>();
+    public rpcs: Map<string, AquaboxRPC> = new Map<string, AquaboxRPC>();
 
     public Updates: EventEmitter<UpdateEvent> = new EventEmitter();
 
@@ -39,21 +33,32 @@ export class AquaBoxService {
         public toastController: ToastController,
         private storage: Storage) {
 
+        this.hosts = new HostsMap();
+        
+
         storage.ready().finally(() => {
-            this.hosts = new HostsMap();
             this.fetchConfigurations();
         })
 
         let self = this;
+        this.cloud.onConnected = (connected: boolean) => {
+            self.subscribeToAll(connected);
+        };
+        
         setInterval(() => {
             for (let host of this.hosts) {
-                if (!host.connected)
-                    self.attachForUpdates(host);
+                if (!host.localAvailable)
+                    self.attachForRPC(host);
+            }
+            if (!this.cloud.isAvailabe()) {
+                this.cloud.start();
+            } else {
+                this.subscribeToAll(true);
             }
         }, 3000);
     }
 
-    private api(box: Aquabox) {
+    private api(box: AquaboxInstance) {
         if (!this.apis[box.id]) {
             this.apis[box.id] = new AquaboxAPI(box, this.baseUrlFromConfiguration(box.configuration, false),
                 this.baseUrlFromConfiguration(box.configuration, true),
@@ -63,9 +68,55 @@ export class AquaBoxService {
         return this.apis[box.id];
     }
 
+    private rpc(box: AquaboxInstance): AquaboxRPC {
+        return  this.hosts.find(box.id).cloudAvailable ? this.cloud : this.rpcs[box.id];
+    }
+
+    private async subscribeToAll(connected: boolean) {
+        if (this.hosts === undefined) {
+            return;
+        }
+        let self = this;
+        for (let host of this.hosts) {
+            if (host.cloudAvailable == connected)
+                continue;
+            let id = host.configuration.id;
+            let boxId = host.configuration.serial;
+                
+            if (connected && !host.cloudAvailable)
+            {
+                let cmd = new RPCCommand(host.configuration);
+                cmd.command = "subscribe_to_box";
+
+            
+                let handler = function (response: RPCCommand, res: boolean) {
+                    let event = new UpdateEvent();
+                    event.Class = UpdateEvent.Aquabox;
+                    event.Box = id;
+                    event.Sender = boxId;
+                    res = res && response.data.hasOwnProperty("cloud_available") && response.data["cloud_available"];
+                    event.Properties = {
+                        "cloudAvailable": res
+                    }
+                    self.Updates.emit(event);
+                }
+                this.cloud.runCommand(cmd, handler);
+            }
+            else if (host.cloudAvailable)
+            {
+                let event = new UpdateEvent();
+                event.Class = UpdateEvent.Aquabox;
+                event.Box = id;
+                event.Sender = boxId;
+                event.Properties = {
+                    "cloudAvailable": false
+                }
+                self.Updates.emit(event);
+            }
+        }
+    }
+
     saveHosts() {
-        console.trace();
-        let cfgs: AquaBoxConfiguration[] = [];
         for (let host of this.hosts) {
             this.storage.set(host.id, host.configuration)
         }
@@ -78,7 +129,7 @@ export class AquaBoxService {
                 .get(keys[id]).then((host) => {
                     try {
                         let cfg = <AquaBoxConfiguration>(host);
-                        let box = new Aquabox(this, cfg);
+                        let box = new AquaboxInstance(this, cfg);
                         this.hosts.insert(box);
                     }
                     catch(e) {
@@ -119,61 +170,56 @@ export class AquaBoxService {
         this.Updates.emit(event);
     }
 
-    attachForUpdates(aquabox: Aquabox) {
-        let url = this.wsUrl(aquabox);
-        if (this.connections[aquabox.id]) {
+    attachForRPC(aquabox: AquaboxInstance) {
+        let url = this.rpcUrl(aquabox);
+        if (this.rpcs[aquabox.id]) {
             return;
         }
-        let ws = new AquaboxStream(aquabox, url[0], url[1]);
-        this.connections[aquabox.id] = ws;
+        let ws = new AquaboxRPC(url);
+        this.rpcs[aquabox.id] = ws;
 
-        ws.onConnected = (box: Aquabox, cloud: boolean, local: boolean) => {
-            let event = new UpdateEvent();
-            let connectionType = (cloud && local) ? ConnectionMethods.Both : ConnectionMethods.Disconnected;
-            if (cloud) {
-                connectionType = ConnectionMethods.CloudOnly;
-            } else if (local) {
-                connectionType = ConnectionMethods.LocalOnly
-            }
-            event.Box = box.id;
-            event.Class = UpdateEvent.Aquabox;
-            event.Sender = box.id;
-            event.Properties = {
-                "connected": connectionType
-            }
-            if (!cloud && !local) {
-                this.connections[box.id] = undefined;
-            }
-            this.Updates.emit(event);
-
-            box.getStatus((ok: boolean) => {
-                box.status.available = ok;
-            });
-        }
-
-        ws.onMessage = (box: Aquabox, message: any) => {
+        ws.onEventMessage = (message: any) => {
             let event = new UpdateEvent();
             event.deserialize(message);
             event.Box = aquabox.id;
             this.Updates.emit(event);
         };
 
+        ws.onConnected = (ok: boolean) => {
+            this.rpcs[aquabox.id] = ws;
+            aquabox.localAvailable = ok;
+
+            let event = new UpdateEvent();
+            event.Box = aquabox.id;
+            event.Class = UpdateEvent.Aquabox;
+            event.Sender = aquabox.configuration.serial;
+            event.Properties = {
+                "localAvailable": ok
+            }
+
+            if (!ok)
+            {
+                this.rpcs[aquabox.id] = undefined;
+            }
+
+            this.Updates.emit(event);
+        }
+
         ws.start();
     }
 
     addHost(configuration: AquaBoxConfiguration) {
         var originalHost = configuration.host;
-        //configuration.host = this.APP_SERVER;
         this.testConfiguration(configuration, (result: boolean) => {
             if (result) {
-                let box = new Aquabox(this, configuration);
+                let box = new AquaboxInstance(this, configuration);
                 this.hosts.insert(box);
                 this.saveHosts();
             } else {
                 configuration.host = originalHost;
                 this.testConfiguration(configuration, (result: boolean) => {
                     if (result) {
-                        let box = new Aquabox(this, configuration);
+                        let box = new AquaboxInstance(this, configuration);
                         this.hosts.insert(box);
                         this.saveHosts();
                     } else {
@@ -186,22 +232,20 @@ export class AquaBoxService {
 
     deleteHost(configuration: AquaBoxConfiguration) {
         this.hosts.removeById(configuration.id);
-        let url = this.wsUrlFromConfiguration(configuration);
         if (this.connections[configuration.id]) {
             this.connections[configuration.id].close();
         }
         this.saveHosts();
     }
 
-    private wsUrlFromConfiguration(configuration: AquaBoxConfiguration) {
+    private rpcUrlFromConfiguration(configuration: AquaBoxConfiguration) {
         let url = ":" + configuration.stream.toString() + "/api/" + configuration.api +
-            "/" + configuration.serial + "/" + this.APP + "/updates";
-        return ["ws://" + configuration.host + url,
-        "ws://" + this.APP_SERVER + url];
+            "/rpc";
+        return "ws://" + configuration.host + url;
     }
 
-    private wsUrl(aquabox: Aquabox) {
-        return this.wsUrlFromConfiguration(aquabox.configuration)
+    private rpcUrl(aquabox: AquaboxInstance) {
+        return this.rpcUrlFromConfiguration(aquabox.configuration)
     }
 
     private baseUrlFromConfiguration(configuration: AquaBoxConfiguration, cloud: boolean = false) {
@@ -212,11 +256,11 @@ export class AquaBoxService {
         return base;
     }
 
-    private baseUrl(aquabox: Aquabox, cloud: boolean = true) {
+    private baseUrl(aquabox: AquaboxInstance, cloud: boolean = true) {
         return this.baseUrlFromConfiguration(aquabox.configuration, cloud);
     }
 
-    private headers(aquabox: Aquabox): HttpHeaders {
+    private headers(aquabox: AquaboxInstance): HttpHeaders {
         return new HttpHeaders()
             .append('Content-Type', 'application/json')
             .append('Accept', 'application/json')
@@ -237,6 +281,9 @@ export class AquaBoxService {
     }
 
     private async apiError(error: HttpErrorResponse) {
+        if (error == null) {
+            return;
+        }
         let err = "Error on making API call " + error.url +
             "\nFailed with: " + error.statusText +
             "\nDetails: " + error.message;
@@ -247,17 +294,17 @@ export class AquaBoxService {
         this.showMessage(err);
     }
 
-    private parseDevices(box: Aquabox, respose: Object, success: (devices: DevicesMap) => void) {
-        if (!Response) {
+    private parseDevices(box: AquaboxInstance, response: Object, success: (devices: DevicesMap) => void) {
+        if (!response) {
             console.error("Can't get list of devices");
             return;
         }
 
-        if (!respose.hasOwnProperty("devices")) {
+        if (!response.hasOwnProperty("devices")) {
             console.error("Can't find property devices in response");
         }
 
-        let raw = respose["devices"];
+        let raw = response["devices"];
         if (!Array.isArray(raw)) {
             console.error("Devices are not an array!")
         }
@@ -272,8 +319,8 @@ export class AquaBoxService {
         success(res);
     }
 
-    private parseRules(box: Aquabox, response: Object, success: (rules: RulesMap) => void): any {
-        if (!Response) {
+    private parseRules(box: AquaboxInstance, response: Object, success: (rules: RulesMap) => void): any {
+        if (!response) {
             console.error("Can't get list of rules");
             return;
         }
@@ -298,172 +345,327 @@ export class AquaBoxService {
         success(res);
     }
 
-    async fetchDevices(box: Aquabox, success: (devices: DevicesMap) => void, fail?: () => void) {
+    async fetchDevices(box: AquaboxInstance, success: (devices: DevicesMap) => void, fail?: () => void) {
+        let cmd = new RPCCommand(box.configuration);
+        cmd.command = "get_all_devices";
+
+        let ok = (box: AquaboxInstance, data: Object) => {
+            this.parseDevices(box, data, success)
+        }
+
+        let failed = (box: AquaboxInstance, error) => {
+            this.apiError(error);
+            if (fail) {
+                fail();
+            }
+        };
+
+        let handler = function (response: RPCCommand, result: boolean) {
+            if (result && response.data.hasOwnProperty("devices") && Array.isArray(response.data["devices"])) {
+                ok(box, response.data);
+            }
+            else {
+                failed(box, response);
+            }
+        }
+
+        this.rpc(box).runCommand(cmd, handler);
+        /*
         this.api(box).get("devices", this.headers(box),
-            (box: Aquabox, data: Object) => {
-                this.parseDevices(box, data, success)
-            }, (box: Aquabox, error) => {
-                this.apiError(error);
-                if (fail)
-                    fail();
-            });
+            ok, failed);
+            */
     }
 
-    getDevice(device: Device, box: Aquabox, success?: () => void, fail?: () => void) {
+    getDevice(device: Device, box: AquaboxInstance, success?: () => void, fail?: () => void) {
         this.api(box).get("device/" + device.id, this.headers(box),
-            (box: Aquabox, data: Object) => {
+            (box: AquaboxInstance, data: Object) => {
                 device.deserialize(data)
                 if (success) success();
-            }, (box: Aquabox, error) => {
+            }, (box: AquaboxInstance, error) => {
                 this.apiError(error);
                 if (fail) fail();
             });
     }
 
-    controlDevice(dev: Device, box: Aquabox, property: string, value: any, success?: (result: boolean) => void) {
-        let changes = JSON.stringify({
+    controlDevice(device: Device, box: AquaboxInstance, property: string, value: any, result?: (result: boolean) => void) {
+        let changes = {
             "changes": [
                 {
                     "property": property,
                     "value": value
                 }
             ]
-        });
+        };
 
-        this.api(box).put("device/" + dev.id + "/set", changes, this.headers(box),
-            (box: Aquabox, data: Object) => {
-                if (success) success(true);
-            }, (box: Aquabox, error) => {
-                this.apiError(error);
-            });
+        let ok = (box: AquaboxInstance, data: Object) => {
+            if (result) {
+                result(true);
+            }
+        };
+        let fail = (box: AquaboxInstance, error) => {
+            this.apiError(error);
+            if (result) {
+                result(false);
+            }
+        };
+
+        let cmd = new RPCCommand(box.configuration);
+        cmd.command = "set";
+        cmd.params[":dev"] = device.id;
+        cmd.data = changes;
+        let handler = function (response: RPCCommand, res: boolean) {
+            if (res) {
+                ok(box, response.data);
+            }
+            else fail(box, "Failed!")
+        }
+
+        this.rpc(box).runCommand(cmd, handler);
+
+        //this.api(box).put("device/" + dev.id + "/set", JSON.stringify(changes), this.headers(box),
+        //    ok, fail);
     }
 
-    fetchRules(box: Aquabox, success: (rules: RulesMap) => void, fail?: () => void) {
+    fetchRules(box: AquaboxInstance, success: (rules: RulesMap) => void, fail?: () => void) {
+
+        let cmd = new RPCCommand(box.configuration);
+        cmd.command = "get_rules";
+
+        let ok = (box: AquaboxInstance, data: Object) => {
+            this.parseRules(box, data, success)
+        }
+
+        let failed = (box: AquaboxInstance, error) => {
+            this.apiError(error);
+            if (fail) {
+                fail();
+            }
+        };
+
+        let handler = function (response: RPCCommand, result: boolean) {
+            if (result && response.data.hasOwnProperty("rules") && Array.isArray(response.data["rules"])) {
+                ok(box, response.data);
+            }
+            else {
+                failed(box, response);
+            }
+        }
+
+        this.rpc(box).runCommand(cmd, handler);
+
+        /*
         this.api(box).get("rules", this.headers(box),
-            (box: Aquabox, data: Object) => {
+            (box: AquaboxInstance, data: Object) => {
                 this.parseRules(box, data, success)
-            }, (box: Aquabox, error) => {
+            }, (box: AquaboxInstance, error) => {
                 this.apiError(error);
                 if (fail)
                     fail();
             });
+            */
     }
 
-    fetchRulesForDevice(box: Aquabox, device: Device, success: (rules: RulesMap) => void, fail?: () => void) {
+    fetchRulesForDevice(box: AquaboxInstance, device: Device, success: (rules: RulesMap) => void, fail?: () => void) {
+        
+        let cmd = new RPCCommand(box.configuration);
+        cmd.command = "get_rules";
+
+        let ok = (box: AquaboxInstance, data: Object) => {
+            this.parseRules(box, data, success)
+        }
+
+        let failed = (box: AquaboxInstance, error) => {
+            this.apiError(error);
+            if (fail) {
+                fail();
+            }
+        };
+
+        let handler = function (response: RPCCommand, result: boolean) {
+            if (result && response.data.hasOwnProperty("rules") && Array.isArray(response.data["rules"])) {
+                ok(box, response.data);
+            }
+            else {
+                failed(box, response);
+            }
+        }
+
+        this.rpc(box).runCommand(cmd, handler);
+
+        /*
         this.api(box).get("rules/" + device.id, this.headers(box),
-            (box: Aquabox, data: Object) => {
-                this.parseRules(box, data, success)
-            }, (box: Aquabox, error) => {
-                this.apiError(error);
-                if (fail)
-                    fail();
-            });
+            ok, fail);
+            */
     }
 
-    updateDevice(box: Aquabox, device: Device, result: (result: boolean) => void) {
+    updateDevice(box: AquaboxInstance, device: Device, result: (result: boolean) => void) {
 
-        this.api(box).post("device/" + device.id, JSON.stringify(device.serialize()), this.headers(box),
-            (box: Aquabox, data: Object) => {
-                if (result) {
-                    result(true);
-                }
-            }, (box: Aquabox, error) => {
-                this.apiError(error);
-                if (result) {
-                    result(false);
-                }
-            });
+        let ok = (box: AquaboxInstance, data: Object) => {
+            if (result) {
+                result(true);
+            }
+        };
+        let fail = (box: AquaboxInstance, error) => {
+            this.apiError(error);
+            if (result) {
+                result(false);
+            }
+        };
+
+        let cmd = new RPCCommand(box.configuration);
+        cmd.command = "update_device";
+        cmd.data = device.serialize();
+        cmd.params[":dev"] = device.id;
+        let handler = function (response: RPCCommand, res: boolean) {
+            if (res) {
+                ok(box, response.data);
+            }
+            else fail(box, "Failed!")
+        }
+
+        this.rpc(box).runCommand(cmd, handler);
+
+        /*
+        this.api(box).post( "device/" + device.id,
+                            JSON.stringify(device.serialize()),
+                            this.headers(box),
+                            ok, fail);
+
+        */
     }
 
-    updateRule(box: Aquabox, rule: Rule, update: boolean, result: (result: boolean) => void) {
+    updateRule(box: AquaboxInstance, rule: Rule, update: boolean, result: (result: boolean) => void) {
 
-        let url = this.baseUrl(box) + "device/" + rule.device + "/rule";
+        let cmd = new RPCCommand(box.configuration);
+        cmd.command = update ? "update_rule" : "create_rule";
+        cmd.data = rule.serialize();
+        cmd.params[":dev"] = rule.device;
+        cmd.params[":rule"] = rule.id;
 
+        let ok = (box: AquaboxInstance, data: Object) => {
+            if (result) {
+                result(true);
+            }
+        };
+        let fail = (box: AquaboxInstance, error) => {
+            this.apiError(error);
+            if (result) {
+                result(false);
+            }
+        };
+
+        let handler = function (response: RPCCommand, res: boolean) {
+            if (res) {
+                ok(box, response.data);
+            }
+            else fail(box, "Failed!")
+        }
+
+        this.rpc(box).runCommand(cmd, handler);
+
+        /*
         let data = JSON.stringify(rule.serialize());
+        let url = "device/" + rule.device + "/rule";
 
         if (update) {
-            this.api(box).post("device/" + rule.device + "/rule", data, this.headers(box),
-                (box: Aquabox, data: Object) => {
-                    if (result) {
-                        result(true);
-                    }
-                }, (box: Aquabox, error) => {
-                    this.apiError(error);
-                    if (result) {
-                        result(false);
-                    }
-                });
+            this.api(box).post(url, cmd.data, this.headers(box),
+                ok, fail);
         } else {
-            this.api(box).put("device/" + rule.device + "/rule", data, this.headers(box),
-                (box: Aquabox, data: Object) => {
-                    if (result) {
-                        result(true);
-                    }
-                }, (box: Aquabox, error) => {
-                    this.apiError(error);
-                    if (result) {
-                        result(false);
-                    }
-                });
+            this.api(box).put(url, cmd.data, this.headers(box),
+                ok, fail);
+        }*/
+    }
+
+    deleteRule(box: AquaboxInstance, rule: Rule, result: (result: boolean) => void) {
+
+        let cmd = new RPCCommand(box.configuration);
+        cmd.command = "delete_rule";
+        cmd.params[":dev"] = rule.device;
+        cmd.params[":rule"] = rule.id;
+
+        let ok = (box: AquaboxInstance, data: Object) => {
+            if (result) {
+                result(true);
+            }
+        };
+        let fail = (box: AquaboxInstance, error) => {
+            this.apiError(error);
+            if (result) {
+                result(false);
+            }
+        };
+
+        let handler = function (response: RPCCommand, res: boolean) {
+            if (res) {
+                ok(box, response.data);
+            }
+            else fail(box, "Failed!")
         }
-    }
 
-    deleteRule(box: Aquabox, rule: Rule, result: (result: boolean) => void) {
-
+        this.rpc(box).runCommand(cmd, handler);
+/*
         this.api(box).delete("rule/" + rule.id, this.headers(box),
-            (box: Aquabox, data: Object) => {
-                if (result) {
-                    result(true);
-                }
-            }, (box: Aquabox, error) => {
-                this.apiError(error);
-                if (result) {
-                    result(false);
-                }
-            });
+            ok, fail);*/
     }
 
-    getStatus(box: Aquabox, success?: (result: boolean) => void) {
-        this.api(box).get("status", this.headers(box),
-            (box: Aquabox, data: Object) => {
-                if (!box.status) {
-                    box.status = new BoxStatus();
-                }
-                box.status.deserialize(data["aquabox"])
-                if (success) {
-                    success(true);
-                }
-            }, (box: Aquabox, error) => {
-                if (success) {
-                    success(error.status == 404);
-                }
-            });
+    async getStatus(box: AquaboxInstance, success?: (result: boolean) => void) {
+        let ok = (box: AquaboxInstance, data: Object) => {
+            if (!box.status) {
+                box.status = new BoxStatus();
+            }
+            box.status.deserialize(data["aquabox"])
+            if (success) {
+                success(true);
+            }
+        }
+
+        let fail = (box: AquaboxInstance, error) => {
+            if (success) {
+                success(error.status == 404);
+            }
+        }
+        /*this.api(box).get("status", this.headers(box),
+            ok, fail);*/
+        let cmd = new RPCCommand(box.configuration);
+        cmd.command = "get_status";
+        cmd.params[":boxId"] = box.configuration.serial;
+        cmd.params[":appId"] = this.APP;
+
+        let handler = function (response: RPCCommand, res: boolean) {
+            if (res) {
+                ok(box, response.data);
+            } else {
+                fail(box, response);
+            }
+        }
+        if (this.rpc(box))
+            this.rpc(box).runCommand(cmd, handler);
     }
 
-    scanForNetworks(box: Aquabox, success?: (result: boolean) => void) {
+    scanForNetworks(box: AquaboxInstance, success?: (result: boolean) => void) {
         this.api(box).get("wifi/scan", this.headers(box),
-            (box: Aquabox, data: Object) => {
+            (box: AquaboxInstance, data: Object) => {
                 if (success) {
                     success(true);
                 }
-            }, (box: Aquabox, error) => {
+            }, (box: AquaboxInstance, error) => {
                 this.apiError(error);
                 if (success)
                     success(false);
             });
     }
 
-    connectToWifi(box: Aquabox, wifi: WiFiInfo, success?: (uid: string) => void) {
+    connectToWifi(box: AquaboxInstance, wifi: WiFiInfo, success?: (uid: string) => void) {
         let network = JSON.stringify(wifi.serialize());
 
         this.api(box).post("wifi/connect", network, this.headers(box),
-            (box: Aquabox, data: Object) => {
+            (box: AquaboxInstance, data: Object) => {
                 if (data.hasOwnProperty("uuid")) {
                     success(data["uuid"].toString());
                 } else {
                     success("");
                 }
-            }, (box: Aquabox, error) => {
+            }, (box: AquaboxInstance, error) => {
                 this.apiError(error);
                 if (success) {
                     success("");
@@ -471,9 +673,9 @@ export class AquaBoxService {
             });
     }
 
-    getNetworks(box: Aquabox, success?: (result: WiFiInfo[]) => void) {
+    getNetworks(box: AquaboxInstance, success?: (result: WiFiInfo[]) => void) {
         this.api(box).get("wifi/networks", this.headers(box),
-            (box: Aquabox, data: Object) => {
+            (box: AquaboxInstance, data: Object) => {
                 let raw = data["networks"];
                 if (!Array.isArray(raw)) {
                     console.error("Networks are not an array!")
@@ -487,7 +689,7 @@ export class AquaBoxService {
                 }
 
                 success(res);
-            }, (box: Aquabox, error) => {
+            }, (box: AquaboxInstance, error) => {
                 this.apiError(error);
             });
     }
@@ -505,7 +707,7 @@ export class AquaBoxService {
         };
 
         this.http.get(statusUrl, httpOptions).subscribe(() => {
-            let ws = new $WebSocket(this.wsUrlFromConfiguration(configuration)[0]);
+            let ws = new $WebSocket(this.rpcUrlFromConfiguration(configuration));
             ws.onOpen(() => {
                 ws.close();
                 result(true)

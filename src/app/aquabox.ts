@@ -1,121 +1,67 @@
-import { BoxStatus } from './box-status';
-import { DevicesMap, RulesMap } from './id-map';
+import { DevicesMap, RulesMap, HostsMap } from './id-map';
 import { Rule } from './rule';
-import { AquaBoxService } from './aqua-box.service';
-import { Serializable, Serialize } from 'ts-serializer';
-import { UpdateEvent } from './update-event';
+import { Device } from './device';
+import { AquaboxInstance, AquaBoxConfiguration } from './aquabox-instance';
 import { WiFiInfo } from './wi-fi-info'
-import { PropertyUpdateEventConsumer } from './property-update-event-consumer';
-import { UpdateConsumer } from './update-consumer';
 
-export class AquaBoxConfiguration {
-    public id: string = ""
-    public name: string = ""
-    public host: string = ""
-    public rest: number
-    public stream: number
-    public protocol: string = "http"
-    public api: string = "v1"
-    public startedAt: number
-    public serial: string
-}
+export interface IAquabox {
 
-export enum ConnectionMethods {
-    Disconnected = 0,
-    LocalOnly = 1,
-    CloudOnly = 2,
-    Both = 3
-}
+    fetchConfigurations(lazy?: (hosts: HostsMap) => void): void;
 
-@Serialize({ root: "configuration" })
-export class Aquabox extends Serializable {
-    private updateConsumer: PropertyUpdateEventConsumer;
-    private networkUpdateConsumer: UpdateConsumer;
-    public id: string
-    public devices: DevicesMap = new DevicesMap()
-    public rules: RulesMap = new RulesMap()
-    public internal: Object = new Object()
-    public connected: ConnectionMethods
-    public cloudAvailable: boolean
-    public status: BoxStatus
+    getHosts(lazy?: (hosts: HostsMap) => void): void;
 
-    public constructor(public service: AquaBoxService,
-        public configuration: AquaBoxConfiguration) {
-        super();
-        this.id = this.configuration.id;
-        this.status = new BoxStatus();
-        this.status.available = false;
-        this.updateConsumer = new PropertyUpdateEventConsumer(this.service, this);
-        this.updateConsumer.setBoxFilter(this.id);
-        this.updateConsumer.setEventClassFilter(UpdateEvent.Aquabox);
-        this.updateConsumer.setSenderFilter(this.id);
-        this.updateConsumer.subscribe();
+    connect(box: AquaboxInstance): void;
 
-        this.networkUpdateConsumer = new UpdateConsumer(this.service)
-        this.networkUpdateConsumer.setBoxFilter(this.id);
-        this.networkUpdateConsumer.setSenderFilter(configuration.serial);
-        this.networkUpdateConsumer.setEventClassFilter(UpdateEvent.Network);
-        this.networkUpdateConsumer.setEventHandler((event: UpdateEvent) => {
-            this.getStatus((ok: boolean) => {
-                this.status.available = ok;
-            });
-        });
-        this.networkUpdateConsumer.subscribe();
-        this.getStatus((ok: boolean) => {
-            this.status.available = ok;
-        });
-    }
+    fetchDevices(   box: AquaboxInstance,
+                    success: (devices: DevicesMap) => void,
+                    fail?: () => void): void;
 
-    async getDevices(success: (devices: DevicesMap) => void, fail?: () => void) {
-        await this.service.fetchDevices(
-            this,
-            (devices: DevicesMap) => {
-                this.devices = devices;
-                success(this.devices);
-            }
-        )
-    }
+    getDevice(  device: Device,
+                box: AquaboxInstance,
+                success?: () => void,
+                fail?: () => void): void;
 
-    isCloudEnabled() {
-        return this.configuration.host == this.service.APP_SERVER;
-    }
+    controlDevice(  dev: Device,
+                    box: AquaboxInstance,
+                    property: string,
+                    value: any,
+                    success?: (result: boolean) => void): void;
 
-    getRules(success: (rules: RulesMap) => void, fail?: () => void) {
-        this.service.fetchRules(
-            this,
-            (rules: RulesMap) => {
-                this.rules = rules;
-                success(this.rules);
-            },
-            fail
-        )
-    }
+    fetchRules( box: AquaboxInstance,
+                success: (rules: RulesMap) => void,
+                fail?: () => void): void;
 
-    updateRule(rule: Rule, success?: (result: boolean) => void) {
-        this.service.updateRule(this, rule, true, success);
-    }
+    fetchRulesForDevice(box: AquaboxInstance,
+                        device: Device,
+                        success: (rules: RulesMap) => void,
+                        fail?: () => void): void;
 
-    createRule(rule: Rule, success?: (result: boolean) => void) {
-        this.service.updateRule(this, rule, false, success);
-    }
+    updateDevice(   box: AquaboxInstance,
+                    device: Device,
+                    result: (result: boolean) => void): void;
 
-    deleteRule(rule: Rule, success?: (result: boolean) => void) {
-        this.service.deleteRule(this, rule, success);
-    }
+    updateRule( box: AquaboxInstance,
+                rule: Rule,
+                update: boolean,
+                result: (result: boolean) => void): void;
 
-    getStatus(success?: (result: boolean) => void) {
-        this.service.getStatus(this, success);
-    }
+    deleteRule( box: AquaboxInstance,
+                rule: Rule,
+                result: (result: boolean) => void): void
 
-    scanForNetworks(success?: (result: boolean) => void) {
-        this.service.scanForNetworks(this, success);
-    }
+    getStatus(  box: AquaboxInstance,
+                success?: (result: boolean) => void): void
 
-    getNetworks(success?: (result: WiFiInfo[]) => void) {
-        this.service.getNetworks(this, success);
-    }
+    scanForNetworks(box: AquaboxInstance,
+                    success?: (result: boolean) => void): void
 
-    connectToWifi(network: WiFiInfo, success?: (uuid: string) => void) {
-        this.service.connectToWifi(this, network, success);
-    }
+    connectToWifi(  box: AquaboxInstance,
+                    wifi: WiFiInfo,
+                    success?: (uid: string) => void): void;
+
+    getNetworks(box: AquaboxInstance,
+                success?: (result: WiFiInfo[]) => void): void;
+
+    testConfiguration(  configuration: AquaBoxConfiguration,
+                        result: (ok: boolean) => void): void;
 }

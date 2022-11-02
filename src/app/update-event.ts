@@ -1,4 +1,4 @@
-import { Aquabox } from './aquabox';
+import { AquaboxInstance } from './aquabox-instance';
 import { Serialize, SerializeProperty, Serializable } from 'ts-serializer';
 
 
@@ -10,6 +10,7 @@ export class UpdateEvent  extends Serializable {
     static Device: string = "device"
     static Rule: string = "rule"
 
+    @SerializeProperty({ map: "boxId" })
     Box: string
 
     @SerializeProperty({ map: "class" })
@@ -21,7 +22,7 @@ export class UpdateEvent  extends Serializable {
     @SerializeProperty({ map: "data" })
     Data: object
 
-    @SerializeProperty({ map: "props"})
+    @SerializeProperty({ map: "properties"})
     Properties: object
 
     apply(source: Serializable) {

@@ -1,16 +1,16 @@
 import { HttpClient, HttpHeaders } from "@angular/common/http";
-import { Aquabox, ConnectionMethods } from "./aquabox";
+import { AquaboxInstance, ConnectionMethods } from "./aquabox-instance";
 import { timeout } from 'rxjs/operators';
 
 export class AquaboxAPI {
-    constructor(private box: Aquabox, private localUrl: string,
+    constructor(private box: AquaboxInstance, private localUrl: string,
         private cloudUrl: string,
         private http: HttpClient) {
 
     }
 
     private urls(url: string) {
-        switch (this.box.connected) {
+        switch (this.box.connected()) {
             case ConnectionMethods.Both: {
                 return [this.cloudUrl + url, this.localUrl + url]    
             }
@@ -28,7 +28,7 @@ export class AquaboxAPI {
     }
 
     private timeouts() {
-        switch (this.box.connected) {
+        switch (this.box.connected()) {
             case ConnectionMethods.Both: {
                 return [2 * 60 * 1000, 5 * 1000]
             }
@@ -47,8 +47,8 @@ export class AquaboxAPI {
 
     public get(url: string,
         request: HttpHeaders,
-        response: (box: Aquabox, data: Object) => void,
-        fail: (box: Aquabox, error: any) => void) {
+        response: (box: AquaboxInstance, data: Object) => void,
+        fail: (box: AquaboxInstance, error: any) => void) {
         this.http.get<Object>(this.urls(url)[0], { headers: request })
             .pipe(timeout(this.timeouts()[0]))
             .subscribe((data) => {
@@ -66,8 +66,8 @@ export class AquaboxAPI {
 
     public delete(url: string,
         request: HttpHeaders,
-        response: (box: Aquabox, data: Object) => void,
-        fail: (box: Aquabox, error: any) => void) {
+        response: (box: AquaboxInstance, data: Object) => void,
+        fail: (box: AquaboxInstance, error: any) => void) {
         this.http.delete<Object>(this.urls(url)[0], { headers: request })
             .pipe(timeout(this.timeouts()[0]))
             .subscribe((data) => {
@@ -86,8 +86,8 @@ export class AquaboxAPI {
     public post(url: string,
         data: any,
         request: HttpHeaders,
-        response: (box: Aquabox, data: Object) => void,
-        fail: (box: Aquabox, error: any) => void) {
+        response: (box: AquaboxInstance, data: Object) => void,
+        fail: (box: AquaboxInstance, error: any) => void) {
         this.http.post<Object>(this.urls(url)[0], data, { headers: request })
             .pipe(timeout(this.timeouts()[0]))
             .subscribe((data) => {
@@ -106,8 +106,8 @@ export class AquaboxAPI {
     public put(url: string,
         data: any,
         request: HttpHeaders,
-        response: (box: Aquabox, data: Object) => void,
-        fail: (box: Aquabox, error: any) => void) {
+        response: (box: AquaboxInstance, data: Object) => void,
+        fail: (box: AquaboxInstance, error: any) => void) {
         this.http.put<Object>(this.urls(url)[0], data, { headers: request })
             .pipe(timeout(this.timeouts()[0]))
             .subscribe((data) => {
