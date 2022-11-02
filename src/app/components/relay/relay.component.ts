@@ -1,7 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { AlertController, NavController } from '@ionic/angular';
 import { AquaBoxService } from 'src/app/aqua-box.service';
-import { Aquabox } from 'src/app/aquabox';
 import { TranslatorService } from 'src/app/translator.service';
 import { UpdateEvent } from 'src/app/update-event';
 import { Device } from '../../device';
