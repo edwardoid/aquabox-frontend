@@ -14,7 +14,7 @@ export class AquaboxRPC {
 
     private ws: $WebSocket;
     private state: StreamState = StreamState.DISCONNECTED;
-    private cloud_domain = "localhost:12140"
+    private cloud_domain = "localhost:1214"
     
     private cmds = new Map<number, Object>();
 
