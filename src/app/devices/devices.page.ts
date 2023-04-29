@@ -24,7 +24,7 @@ export class DevicesPage implements OnInit {
         private loadingController: LoadingController,
         public alertController: AlertController,
         private aquabox: AquaBoxService,
-        private tr: TranslatorService,
+        public tr: TranslatorService,
         private componentResolver: ComponentFactoryResolver) {
         let boxId = this.route.snapshot.paramMap.get('box');
         this.aquabox.getHosts((hosts: HostsMap) => {
@@ -38,6 +38,8 @@ export class DevicesPage implements OnInit {
 
     ngOnInit() {
     }
+
+    async setupDevice(dev: any) {}
 
     async getDevices(event) {
         const loading = await this.loadingController.create({
@@ -59,6 +61,8 @@ export class DevicesPage implements OnInit {
                             }
                             else if (dev.deviceClass == "step") {
                                 deviceComponent = self.componentResolver.resolveComponentFactory(StepComponent);
+                            } else {
+                                continue;
                             }
                             var component = self.DevicesContainer.createComponent(deviceComponent);
                             component.instance['box'] = self.box.id;

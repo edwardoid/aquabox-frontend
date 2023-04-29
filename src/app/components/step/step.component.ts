@@ -16,7 +16,7 @@ export class StepComponent implements OnInit {
   @Input() box: string;
   @Input() dev: Device;
   constructor(
-    private tr: TranslatorService,
+    public tr: TranslatorService,
     public alertController: AlertController,
     private navi: NavController,
     private aquabox: AquaBoxService
@@ -49,7 +49,7 @@ export class StepComponent implements OnInit {
 
   private max: number = 0;
   private current: number = 0;
-  private progress: number = 0;
+  public progress: number = 0;
 
   ngOnInit() {
     this.max = this.dev.times;

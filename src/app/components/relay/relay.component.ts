@@ -16,7 +16,7 @@ export class RelayComponent implements OnInit {
   @Input() box: string;
   @Input() dev: Device;
   constructor(
-    private tr: TranslatorService,
+    public tr: TranslatorService,
     public alertController: AlertController,
     private navi: NavController,
     private aquabox: AquaBoxService

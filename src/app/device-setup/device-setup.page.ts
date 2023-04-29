@@ -67,7 +67,7 @@ export class DeviceSetupPage implements OnInit {
 
   constructor(private navi: NavController,
               private aquabox: AquaBoxService,
-              private tr: TranslatorService,
+              public tr: TranslatorService,
               private alertController: AlertController,
               private route: ActivatedRoute) {
   }
