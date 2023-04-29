@@ -14,28 +14,24 @@ export class QRScanningPage implements OnInit {
               private navi: NavController,
               public toastController: ToastController,
               private popoverCtrl: PopoverController) {
-    var self = this;
-    this.scanner.setStatusUpdateListener(() => {
-      self.canSwitchCamera = this.scanner.status.canChangeCamera;
-    });
   }
 
   scanning: boolean = false;
-  canSwitchCamera: boolean = false;
 
   ngOnInit() {
-    this.scanner.updateCurrentStatus();
     this.scan();
   }
 
   ngOnDestroy() {
     this.scanner.stop();
     this.scanning = false;
+    document.querySelector('body').classList.remove('scanner-active');
   }
 
   async scan() {
+    document.querySelector('body').classList.add('scanner-active');
     this.scanning = true;
-    this.scanner.scan().then( async (result: string) => {
+    this.scanner.scan().then( async () => {
       this.scanner.stop();
       this.scanning = false;
       this.navi.back();

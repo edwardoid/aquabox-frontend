@@ -1,25 +1,23 @@
 import { Platform, NavController } from '@ionic/angular';
 import { Injectable } from '@angular/core';
-import { QRScanner, QRScannerStatus } from '@ionic-native/qr-scanner/ngx';
+import { BarcodeScanner, SupportedFormat } from '@capacitor-community/barcode-scanner';
+import { Capacitor } from '@capacitor/core';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ScanService {
-  constructor(private qrScanner: QRScanner,
-              private platform: Platform,
-              private nav: NavController) {
+  constructor(
+      private platform: Platform,
+      private nav: NavController) {
       this.updateCurrentStatus();
+      if(Capacitor.getPlatform() !== "web") {
+        BarcodeScanner.prepare();
+      }
   }
 
-  public status: QRScannerStatus;
   public lastScannedText: string = undefined;
   private filter: (text: string) => boolean; 
-  private statusUpdateListener: () => void;
-
-  setStatusUpdateListener(listener: () => void) {
-    this.statusUpdateListener = listener;
-  }
 
   scanAndComeBack(callback: (text: string) => boolean) {
     this.filter = callback;
@@ -27,6 +25,7 @@ export class ScanService {
   }
 
   async toggleLight() {
+    /*
     this.qrScanner.getStatus()
     .then((status: QRScannerStatus) => {
       if (!status.canEnableLight)
@@ -45,83 +44,44 @@ export class ScanService {
             self.statusUpdateListener();
           }
         });
-    });
+    });*/
   }
 
   async toggleCamera() {
-    this.qrScanner.getStatus()
-    .then((status: QRScannerStatus) => {
-      if (!status.canChangeCamera)
-        return;
-      
-      var self = this;
-      this.qrScanner.useCamera((status.currentCamera + 1) % 2)
-        .then((status: QRScannerStatus) => {
-          self.status = status;
-          if (self.statusUpdateListener) {
-            self.statusUpdateListener();
-          }
-        });
-    });
   }
 
   stop() {
-    this.qrScanner.hide();
-    this.qrScanner.destroy();
+    if(Capacitor.getPlatform() === "web") {
+       return;
+    }
+    
+    BarcodeScanner.showBackground();
+    BarcodeScanner.stopScan();
   }
 
   updateCurrentStatus() {
     var self = this;
-    return this.qrScanner.getStatus()
-    .then((status: QRScannerStatus) => {
-      self.status = status;
-      if (self.statusUpdateListener) {
-        self.statusUpdateListener();
-      }
-    });
   }
 
-  scan(): Promise<any> {
-    if (this.platform.is("desktop")) {
-      this.lastScannedText = "1213;1214;testDev;aquaboxDev;46";
-      return new Promise<any>((resolve, reject) => {
-        if (this.filter(this.lastScannedText))
-          resolve(this.lastScannedText);
-        else
-          reject();
-      });
+  async scan() {
+
+    if(Capacitor.getPlatform() === "web") {
+      this.lastScannedText = "1213;1214;testDev;abtest;16";
+      this.filter(this.lastScannedText);
+    } else {
+    
+      await BarcodeScanner.checkPermission({ force: true });
+
+
+      this.lastScannedText = undefined;
+      
+      BarcodeScanner.hideBackground();
+      let result = await BarcodeScanner.startScan({ targetedFormats: [ SupportedFormat.QR_CODE ] });
+      while(!this.filter(result.content)) {
+        result = await BarcodeScanner.startScan({ targetedFormats: [ SupportedFormat.QR_CODE ] });
+      }
+      this.lastScannedText = result.content;
     }
-    this.lastScannedText = undefined;
-    var self = this;
-    // Optionally request the permission early
-    return this.qrScanner.prepare()
-      .then((status: QRScannerStatus) => {
-        self.status = status;
-        return new Promise((resolve, reject) => {
-          if (status.authorized) {
-            // camera permission was granted
-
-              let scanSub = this.qrScanner.scan().subscribe((text: string) => {
-
-              
-              if (!this.filter(text))
-                return;
-              this.qrScanner.hide(); // hide camera preview
-              scanSub.unsubscribe(); // stop scanning
-              this.lastScannedText = text;
-              resolve(text);
-            });
-
-            this.qrScanner.show();
-            this.updateCurrentStatus();
-          } else if (status.denied) {
-            this.qrScanner.openSettings();
-            reject(new Error('MESSAGES.QRSCANNER.CHANGE_SETTINGS_ERROR'));
-          } else {
-            reject(new Error('MESSAGES.QRSCANNER.PERMISSION_DENIED_ERROR'));
-          }
-        })
-      })
   }
 
 }
