@@ -4,6 +4,7 @@ import { ActivatedRoute } from '@angular/router';
 import { Component, OnInit, ViewChild, ElementRef, OnChanges, SimpleChanges } from '@angular/core';
 import { NavController, LoadingController, AlertController } from '@ionic/angular';
 import { toCanvas } from 'qrcode';
+import { ConnectionMethods } from '../aquabox-instance'
 import { NetworkStatus } from '../box-status';
 
 @Component({
@@ -12,6 +13,9 @@ import { NetworkStatus } from '../box-status';
   styleUrls: ['./host-settings.page.scss'],
 })
 export class HostSettingsPage implements OnInit {
+
+  ConnectionMethods = ConnectionMethods
+
   configuration: AquaBoxConfiguration = new AquaBoxConfiguration();
   box: AquaboxInstance = null;
   
