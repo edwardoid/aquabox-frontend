@@ -26,11 +26,11 @@ export class UpdateEvent  extends Serializable {
     Properties: object
 
     apply(source: Serializable) {
-        let props = "*" in this.Properties ? this.Properties["*"] : this.Properties;
+        var props = "*" in this.Properties ? this.Properties["*"] : this.Properties;
         this.applyOnObject(source, props);
     }
 
-    applyOnObject(source: Serializable, properties: object) {
+    applyOnObject(source: Serializable, properties: any) {
         for (let p in properties) {
             if (!source._serializeMap) {
                 source[p] = properties[p];
