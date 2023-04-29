@@ -1,8 +1,6 @@
-import { AquaboxInstance } from '../aquabox-instance';
-import { HostsMap } from './../id-map';
-import { AquaBoxService } from './../aqua-box.service';
 import { Component } from '@angular/core';
 import { NavController } from '@ionic/angular';
+import { GlobalSettings, AquaBoxService } from '../aqua-box.service';
 
 @Component({
   selector: 'app-version',
@@ -12,10 +10,18 @@ import { NavController } from '@ionic/angular';
 export class VersionPage {
 
   errorString: string = "Nothing";
+  settings: GlobalSettings
 
-  constructor(private nav: NavController) {
+  constructor(private nav: NavController,
+              public aquabox: AquaBoxService) {
+    this.settings = aquabox.settings()
   }
 
   ngOnInit() {
+  }
+
+  save() {
+    console.log("OK: " + this.settings.cloudEnabled + " <- " + this.aquabox.settings().cloudEnabled)
+    this.aquabox.saveSettings(this.settings)
   }
 }
