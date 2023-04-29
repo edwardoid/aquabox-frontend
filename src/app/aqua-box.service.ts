@@ -15,12 +15,32 @@ import { AquaboxRPC } from './aquabox-rpc';
 import { AquaboxAPI } from './aquabox-api';
 import { RPCCommand } from './rpc-command';
 
+
+export class GlobalSettings {
+
+    constructor() {
+            this.devDevice = new AquaBoxConfiguration()
+            this.devDevice.host = "pluto";
+            this.devDevice.serial = "aquaboxDev1";
+            this.devDevice.rest = 8956;
+            this.devDevice.stream = 9696;
+            console.log(this.devDevice.toString())
+    }
+
+
+    public devDevice: AquaBoxConfiguration
+    public cloudEnabled: boolean = true
+    //public cloudUrl: string = "aquabox.me"
+    public cloudUrl: string = "pluto"
+    public cloudHttp: number = 1213
+    public cloudWS: number = 1214
+}
+
 @Injectable({
     providedIn: 'root'
 })
 export class AquaBoxService {
     public APP = "5e0934b3d80b3932ea8cc095";
-    public APP_SERVER = "aquabox.me";
     public hosts: HostsMap = undefined;
     public cloud: AquaboxRPC = new AquaboxRPC("");
     public connections: Map<string, AquaboxStream> = new Map<string, AquaboxStream>()
@@ -28,6 +48,7 @@ export class AquaBoxService {
     public rpcs: Map<string, AquaboxRPC> = new Map<string, AquaboxRPC>();
 
     public Updates: EventEmitter<UpdateEvent> = new EventEmitter();
+    private defaults: GlobalSettings = new GlobalSettings();
 
     constructor(private http: HttpClient,
         public toastController: ToastController,
@@ -56,6 +77,18 @@ export class AquaBoxService {
                 this.subscribeToAll(true);
             }
         }, 3000);
+    }
+
+    public settings(): GlobalSettings
+    {
+        return this.defaults
+    }
+
+    public saveSettings(settings: GlobalSettings)
+    {
+        this.storage.set("settings", settings).finally(() => {
+            console.log("Settings stored")
+        })
     }
 
     private api(box: AquaboxInstance) {
@@ -126,11 +159,18 @@ export class AquaBoxService {
         await this.storage.keys().then((keys: string[]) => {
             for (let id in keys) {
                 this.storage
-                .get(keys[id]).then((host) => {
+                .get(keys[id]).then((data) => {
                     try {
-                        let cfg = <AquaBoxConfiguration>(host);
-                        let box = new AquaboxInstance(this, cfg);
-                        this.hosts.insert(box);
+                        console.log("Loading data for " + keys[id])
+                        if (keys[id] == "settings") {
+                            if (id == "settings") {
+                                this.defaults = <GlobalSettings>(data);
+                            }            
+                        } else {
+                            let cfg = <AquaBoxConfiguration>(data);
+                            let box = new AquaboxInstance(this, cfg);
+                            this.hosts.insert(box);
+                        }
                     }
                     catch(e) {
                         console.error("Skipping key " + keys[id]);
@@ -250,7 +290,7 @@ export class AquaBoxService {
 
     private baseUrlFromConfiguration(configuration: AquaBoxConfiguration, cloud: boolean = false) {
         let base = configuration.protocol + "://";
-        base += cloud ? this.APP_SERVER : configuration.host;
+        base += cloud ? this.defaults.cloudUrl : configuration.host;
         base += ":" + configuration.rest.toString()
             + "/api/" + configuration.api + "/";
         return base;
@@ -702,7 +742,7 @@ export class AquaBoxService {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
                 'boxId': configuration.serial,
-                'appId': this.APP_SERVER
+                'appId': this.APP
             })
         };
 
