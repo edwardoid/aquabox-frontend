@@ -15,32 +15,7 @@
         </ion-refresher-content>
     </ion-refresher>
 
-    <ion-card class="sensor-card">
-        <ion-card-header>
-            <ion-card-title class="sensor-card-title">
-                <h1>Sensors</h1>
-            </ion-card-title>
-        </ion-card-header>
-        <ion-card-content>
-            <div *ngFor="let dev of this?.devices">
-                <ion-row id="sensor{{dev.id}}" *ngIf="dev.deviceClass == 'sensor'" class="sensor-card-sub">
-                    <ion-item-divider class="sensor-card-sub">
-                        <ion-thumbnail slot="start">
-                            <img src="{{dev.image()}}">
-                        </ion-thumbnail>
-                        <ion-text>
-                            <h2>{{dev.name}}: {{dev.round(1)}}°C</h2>
-                        </ion-text>
-                        <ion-button class="device_icon" fill="clear" style="float: right;" slot="end" (click)="setupDevice(dev)">
-                            <ion-icon name="create" slot="icon-only"></ion-icon>
-                        </ion-button>
-                    </ion-item-divider>
-                </ion-row>
-            </div>
 
-
-        </ion-card-content>
-    </ion-card>
     <ion-list>
         <ng-container #devicesList>
 
