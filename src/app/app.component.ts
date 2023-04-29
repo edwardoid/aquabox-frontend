@@ -1,12 +1,13 @@
 import { HostsMap } from './id-map';
 import { AquaBoxConfiguration, AquaboxInstance } from './aquabox-instance';
 import { AquaBoxService } from './aqua-box.service';
-import { Component } from '@angular/core';
+import { Component, Inject } from '@angular/core';
+import { SplashScreen } from '@capacitor/splash-screen';
+import { StatusBar, Style, } from '@capacitor/status-bar';
 
 import { AlertController, Platform } from '@ionic/angular';
-import { SplashScreen } from '@ionic-native/splash-screen/ngx';
-import { StatusBar } from '@ionic-native/status-bar/ngx';
-import { AppUpdate } from '@ionic-native/app-update/ngx';
+import { AppUpdate } from '@capawesome/capacitor-app-update';
+import { Capacitor } from '@capacitor/core';
 
 @Component({
     selector: 'app-root',
@@ -25,19 +26,12 @@ export class AppComponent {
             icon: 'document'
         }
     ];
-
-    private appUpdate: AppUpdate = undefined
-
+    
     constructor(
         private platform: Platform,
-        private splashScreen: SplashScreen,
-        private statusBar: StatusBar,
         public aquabox: AquaBoxService,
         public alertController: AlertController
     ) {
-        if (this.platform.is("android")) {
-            this.appUpdate = new AppUpdate();
-        }
         this.initializeApp();
     }
 
@@ -58,18 +52,10 @@ export class AppComponent {
 
     async initializeApp() {
         this.platform.ready().then(() => {
-            this.statusBar.styleLightContent();
-            this.statusBar.show();
-            this.splashScreen.hide();
-
-            const updateUrl = 'http://aquabox.me:8081/android/aquabox-latest.xml';
-
-            if (!this.platform.is("desktop")) {
-                this.appUpdate.checkAppUpdate(updateUrl).then(update => {
-                    alert("Update Status:  " + update.msg);
-                }).catch(error => {
-                    this.updateFailed(error);
-                });
+            if (Capacitor.getPlatform() !== "web") {
+                StatusBar.setStyle({ style: Style.Dark })
+                StatusBar.show();
+                SplashScreen.hide();
             }
 
             this.aquabox.getHosts((hosts: HostsMap) => {
