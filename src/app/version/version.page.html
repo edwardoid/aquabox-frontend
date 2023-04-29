@@ -10,14 +10,70 @@
 </ion-header>
 
 <ion-content [fullscreen]="true">
-  <ion-text>
-    <h1>AquaBox</h1> <h2>version 1.0 alpha</h2>
-  </ion-text>
-  <ion-text>
-    <h2>
-      Known Issues:
-    </h2>
-    <h3>Device state can be wrong if all rules has been disabled.</h3>
-    <h3>Device state can be wrong if all rules has been disabled.</h3>
-  </ion-text>
+  <ion-grid>
+    <ion-row>
+      <p>Aquabox</p>
+      <p>Version</p>
+    </ion-row>
+  </ion-grid>
+  <ion-list>
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Cloud settings</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-list>
+          <ion-list>
+            <ion-item>
+              <ion-label>Enable</ion-label>
+              <ion-checkbox [(ngModel)]="settings.cloudEnabled"></ion-checkbox>
+            </ion-item>
+            <ion-item>
+              <ion-label>URL</ion-label>
+              <ion-input placeholder="Hostname or IP" [(ngModel)]="settings.cloudUrl"></ion-input>
+            </ion-item>
+            <ion-item>
+              <ion-label>HTTP Port</ion-label>
+              <ion-input type="number" placeholder="API port" [(ngModel)]="settings.cloudHttp"></ion-input>
+            </ion-item>
+            <ion-item>
+              <ion-label>WS Port</ion-label>
+              <ion-input type="number" placeholder="WebSocket port" [(ngModel)]="settings.cloudWS"></ion-input>
+            </ion-item>
+          </ion-list>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Test device</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-list>
+          <ion-list>
+            <ion-item>
+              <ion-label>Hostname</ion-label>
+              <ion-input placeholder="Hostname or IP" [(ngModel)]="settings.cloudUrl"></ion-input>
+            </ion-item>
+            <ion-item>
+              <ion-label>HTTP Port</ion-label>
+              <ion-input type="number" placeholder="API port" [(ngModel)]="settings.cloudHttp"></ion-input>
+            </ion-item>
+            <ion-item>
+              <ion-label>WS Port</ion-label>
+              <ion-input type="number" placeholder="WebSocket port" [(ngModel)]="settings.cloudWS"></ion-input>
+            </ion-item>
+            <ion-item>
+              <p>{{settings.devDevice.toString()}}</p>
+            </ion-item>
+          </ion-list>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+    <ion-item>
+      <ion-button size="large" color="success" expand="block" (click)="save()">
+        Save
+      </ion-button>
+    </ion-item>
+  </ion-list>
 </ion-content>
