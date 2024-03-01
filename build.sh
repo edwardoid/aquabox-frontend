@@ -1,5 +1,6 @@
 #!/bin/bash
-export ANDROID_HOME=$HOME/Android/Sdk
+export ANDROID_HOME=/opt/android-sdk
+export ANDROID_SDK_ROOT=$ANDROID_HOME
 export PATH=$PATH:$ANDROID_SDK_ROOT/tools/bin
 export PATH=$PATH:$ANDROID_SDK_ROOT/platform-tools
 export PATH=$PATH:$ANDROID_SDK_ROOT/emulator
@@ -11,6 +12,12 @@ export PATH=$PATH:$ANDROID_SDK_ROOT/emulator
 #ionic cordova run android -l --no-interactive --verbose  --port=8200
 #ionic cordova app:ionic-cordova-build --platform=android
 #ionic cordova build android --verbose
+
+# install modules refered in package.json
+npm install
+
+# build www folder
+npm run build
 
 # Build debug
 ionic capacitor copy android && cd android && ./gradlew assembleDebug && cd ..
