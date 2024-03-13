@@ -1,0 +1,47 @@
+FROM ubuntu:22.04
+
+LABEL maintainer="Edward Sargsyan <edward.sarkisyan@gmail.com>"
+
+USER root
+
+ENV DEBIAN_FRONTEND noninteractive
+
+# 1) Install system package dependencies
+RUN apt-get update --fix-missing \
+ && apt install --reinstall -y software-properties-common \
+ && add-apt-repository ppa:openjdk-r/ppa \
+ && apt update \
+ && apt install -y \
+        build-essential \
+        openjdk-11-jdk \
+        curl \
+        unzip \
+        git \
+        gradle 
+
+# 2) Install Nodejs/NPM/Ionic-Cli
+ARG NODEJS_VERSION="20"
+
+RUN curl -sL https://deb.nodesource.com/setup_${NODEJS_VERSION}.x | bash - \
+ && apt-get update \
+ && apt-get install -y nodejs \
+ && npm install -g cordova @ionic/cli
+
+# 3) Install sdkmanager (command line tools) then use it to install other components of android sdk
+ARG CMDLINE_TOOLS="commandlinetools-linux-6609375_latest.zip"
+ARG ANDROID_HOME="/usr/lib/android-sdk"
+
+ENV ANDROID_HOME "${ANDROID_HOME}"
+
+RUN mkdir --parents "${ANDROID_HOME}/cmdline-tools" \
+ && cd "${ANDROID_HOME}/cmdline-tools" \
+ && curl -fSLk https://dl.google.com/android/repository/$CMDLINE_TOOLS -o $CMDLINE_TOOLS \
+ && unzip $CMDLINE_TOOLS \
+ && mv tools latest \
+ && rm -rf $CMDLINE_TOOLS \
+ && (while sleep 3; do echo "y"; done) | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses \
+ && $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platform-tools" "build-tools;34.0.0" "platforms;android-34"
+
+# 4) Set the working folder
+RUN mkdir /ionicapp
+WORKDIR /ionicapp
