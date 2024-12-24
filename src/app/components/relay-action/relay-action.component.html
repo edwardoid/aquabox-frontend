@@ -1,9 +1,0 @@
-<ion-grid>
-    <ion-row>
-        <ion-button color="{{change.value == 0 ? 'danger' : 'success'}}" class="action-button" (click)="toggle()"
-            *ngIf="editable">{{actionName()}} </ion-button>
-        <ion-text class="{{change.value == 1 ? 'turn_on' : 'turn_off'}}" *ngIf="!editable" align-self-center>
-            <h1>{{actionName()}}</h1>
-        </ion-text>
-    </ion-row>
-</ion-grid>

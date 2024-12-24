@@ -1,0 +1,42 @@
+<ion-header [translucent]="true">
+    <ion-toolbar>
+        <ion-buttons slot="start">
+            <ion-back-button></ion-back-button>
+        </ion-buttons>
+        <ion-title>
+            <ion-row>
+                <div>
+                    Adding new
+                </div>
+                <div style="margin-left: 0.5rem; margin-right: 0.5rem">
+                    <img src="./../assets/logo.png" style="max-height: 1.5rem;">
+                </div>
+            </ion-row>
+        </ion-title>
+    </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+    <swiper-container [slidesPerView]="1" [loop]="true" [centeredSlides]="true">
+        <swiper-slide>
+            <ion-text>
+                <h2>
+                    Before adding your new Aquabox be sure it is physically nearby, and display is on and showing a QR code.
+                </h2>
+                <h3>If display is on, but there is no QR code just wait for some time untill it show the QR code</h3>
+            </ion-text>
+        </swiper-slide>
+        <swiper-slide>
+            <h2>Press the button below to scan the QR code</h2>
+            <ion-button>Scan</ion-button>
+        </swiper-slide>
+        <swiper-slide>Slide 3</swiper-slide>
+    </swiper-container>
+</ion-content>
+
+<ion-footer *ngIf="sliderIndex < 2">
+    <div class="centered">
+        <ion-button class="centered" (click)="next()" full>Next
+        </ion-button>
+    </div>
+</ion-footer>

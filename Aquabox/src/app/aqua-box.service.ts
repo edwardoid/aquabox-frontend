@@ -1,0 +1,491 @@
+import { EventEmitter, Injectable } from '@angular/core';
+
+import { Device } from './device';
+import { Rule } from './rule';
+import { WiFiInfo } from './wi-fi-info';
+import { BoxStatus } from './box-status';
+import { DevicesMap, RulesMap, HostsMap } from './id-map';
+import { Aquabox, AquaBoxConfiguration } from './aquabox';
+import { UpdateEvent } from './update-event';
+import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
+import { Md5 } from 'ts-md5';
+import { Storage } from '@ionic/storage-angular';
+import { WebSocketSubject, webSocket } from 'rxjs/webSocket';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class AquaBoxService {
+
+  public APP = "5e0934b3d80b3932ea8cc095";
+  public APP_SERVER = "aquabox.me";
+  public hosts: HostsMap = new HostsMap();
+  public ws: Map<string /* url */, WebSocketSubject<void>> = new Map<string, WebSocketSubject<void>>();
+
+  public Updates: EventEmitter<UpdateEvent> = new EventEmitter();
+  
+  constructor(private storage: Storage,
+              private http: HttpClient) {
+
+      this.storage.create().finally(() => {
+          this.fetchConfigurations();
+      })
+
+      let self = this;
+      setInterval(() => {
+          for (let host of this.hosts) {
+              if (!host.connected)
+                  self.attachForUpdates(host);
+          }
+      }, 3000);
+  }
+
+  saveHosts() {
+      console.trace();
+      let cfgs: AquaBoxConfiguration[] = [];
+      for (let host of this.hosts) {
+          cfgs.push(host.configuration);
+      }
+
+      this.storage.set("hosts", JSON.stringify(cfgs))
+  }
+
+  async fetchConfigurations(lazy?: (hosts: HostsMap) => void) {
+      await this.storage.get("hosts").then((hostsValue) => {
+          this.hosts = new HostsMap();
+          if (hostsValue == undefined) {
+              return;
+          }
+          let hosts = JSON.parse(hostsValue);
+
+          if (!Array.isArray(hosts)) {
+              return;
+          }
+
+          for (let i in hosts) {
+              let cfg: AquaBoxConfiguration = hosts[i]
+              let box = new Aquabox(this, cfg);
+              this.hosts.insert(box);
+          }
+
+          if (lazy)
+              lazy(this.hosts);
+      });
+  }
+
+  getHosts(lazy?: (hosts: HostsMap) => void) {
+      if (!this.hosts) {
+          try {
+              this.fetchConfigurations(lazy);
+          }
+          catch (e) {
+              console.log(e);
+          }
+      }
+      else if (lazy) {
+          lazy(this.hosts);
+      }
+
+      return this.hosts;
+  }
+
+  connected(box: string, url: string, connected: boolean) {
+      let event = new UpdateEvent();
+      event.Box = box;
+      event.Class = UpdateEvent.Aquabox;
+      event.Sender = box;
+      event.Properties = {
+          "connected": connected
+      }
+      if (!connected) {
+          this.ws.delete(url);
+      }
+      this.Updates.emit(event);
+  }
+
+  attachForUpdates(aquabox: Aquabox) {
+      let url = this.wsUrl(aquabox);
+      let key = "ws_" + Md5.hashAsciiStr(url);
+      if (this.ws.get(key)) {
+          return;
+      }
+
+      let conn = webSocket({
+        url: key,
+        openObserver: {
+          next: () => {
+            this.connected(aquabox.id, key, true);
+            aquabox.getStatus(); // Update status if we have connection
+          }
+        },
+        closeObserver: {
+          next: () => { this.connected(aquabox.id, key, false); }
+        },
+        closingObserver: {
+          next: () => { this.connected(aquabox.id, key, false); }
+        },
+        deserializer: (message: MessageEvent) => {
+          let event = new UpdateEvent();
+          event.deserialize(JSON.parse(message.data));
+          event.Box = aquabox.id;
+          this.Updates.emit(event);
+        }
+      })
+      this.ws.set(key, conn);
+  }
+
+  addHost(configuration: AquaBoxConfiguration) {
+      var originalHost = configuration.host;
+      configuration.host = this.APP_SERVER;
+      this.testConfiguration(configuration, (result: boolean) => {
+          if (result) {
+              let box = new Aquabox(this, configuration);
+              this.hosts.insert(box);
+              this.saveHosts();
+          } else {
+              configuration.host = originalHost;
+              this.testConfiguration(configuration, (result: boolean) => {
+                  if (result) {
+                      let box = new Aquabox(this, configuration);
+                      this.hosts.insert(box);
+                      this.saveHosts();
+                  } else {
+                      this.showMessage("Host is not online");
+                  }
+              });
+          }
+      })
+  }
+
+  deleteHost(configuration: AquaBoxConfiguration) {
+      this.hosts.removeById(configuration.id);
+      let url = this.wsUrlFromConfiguration(configuration);
+      let key = "ws_" + Md5.hashAsciiStr(url);
+      let connection = this.ws.get(key);
+      if (connection) {
+          connection.unsubscribe();
+          this.ws.delete(key);
+      }
+      this.saveHosts();
+  }
+
+  private wsUrlFromConfiguration(configuration: AquaBoxConfiguration) {
+      return "ws://" + configuration.host + ":" + configuration.stream.toString() + "/api/" + configuration.api +
+             "/" + configuration.serial + "/" + this.APP + "/updates";
+  }
+
+  private wsUrl(aquabox: Aquabox) {
+      return this.wsUrlFromConfiguration(aquabox.configuration)
+  }
+
+  private baseUrlFromConfiguration(configuration: AquaBoxConfiguration) {
+      let base = configuration.protocol + "://"
+          + configuration.host + ":" + configuration.rest.toString()
+          + "/api/" + configuration.api + "/";
+      return base;
+  }
+
+  private baseUrl(aquabox: Aquabox) {
+      return this.baseUrlFromConfiguration(aquabox.configuration);
+  }
+
+  private headers(aquabox: Aquabox): any {
+      return {
+          'Content-Type' : 'application/json',
+          'Accept': 'application/json',
+          'boxId': aquabox.configuration.serial,
+          'appId': this.APP
+      };
+  }
+
+  private async showMessage(text: any) {
+      console.error(text.toString());
+      // const toast = await this.toastController.create({
+      //     message: text,
+      //     //showCloseButton: true,
+      //     //position: 'top',
+      //     //closeButtonText: 'Done',
+      //     duration: 10000
+      // });
+      // toast.present();
+  }
+
+  private async apiError(error: HttpErrorResponse) {
+      let err = "Error on making API call " + error.url +
+          "\nFailed with: " + error.statusText +
+          "\nDetails: " + error.message;
+      this.showMessage(err);
+  }
+
+  private parseDevices(box: Aquabox, respose: Object, success: (devices: DevicesMap) => void) {
+      if (!Response) {
+          console.error("Can't get list of devices");
+          return;
+      }
+
+      if (!respose.hasOwnProperty("devices")) {
+          console.error("Can't find property devices in response");
+      }
+
+      let raw = (respose as any)["devices"];
+      if (!Array.isArray(raw)) {
+          console.error("Devices are not an array!")
+      }
+
+      let res = new DevicesMap;
+      for (let o of raw as Array<String>) {
+          let d = new Device(this, box);
+          d.deserialize(o);
+          res.insert(d);
+      }
+
+      success(res);
+  }
+
+  private parseRules(box: Aquabox, response: Object, success: (rules: RulesMap) => void): any {
+      if (!Response) {
+          console.error("Can't get list of rules");
+          return;
+      }
+
+      if (!response.hasOwnProperty("rules")) {
+          console.error("Can't find property rules in response");
+      }
+
+      let raw = (response as any)["rules"];
+      if (!Array.isArray(raw)) {
+          console.error("Rules are not an array!")
+      }
+
+      let res = new RulesMap;
+      for (let o of raw as Array<String>) {
+          let r = new Rule(box);
+          r.deserialize(o);
+          r.subscribeForUpdates();
+          res.insert(r);
+      }
+
+      success(res);
+  }
+
+  async fetchDevices(box: Aquabox, success: (devices: DevicesMap) => void, fail?: () => void) {
+      this.http.get<Object>(this.baseUrl(box) + "devices", { headers: this.headers(box) })
+          .subscribe((response) => {
+              this.parseDevices(box, response, success)
+          }, (error) => {
+              this.apiError(error);
+              if (fail)
+                  fail();
+          });
+  }
+
+  getDevice(device: Device, box: Aquabox, success?: () => void, fail?: () => void) {
+      this.http.get<Object>(this.baseUrl(box) + "device/" + device.id, { headers: this.headers(box) })
+          .subscribe((response) => {
+              device.deserialize(response)
+              if (success) success();
+          }, (error) => {
+              this.apiError(error);
+              if (fail) fail();
+          });
+  }
+
+  controlDevice(dev: Device, box: Aquabox, property: string, value: any, success?: (result: boolean) => void) {
+
+      let changes = JSON.stringify({
+          "changes": [
+              { "property" : property,
+                "value" : value
+              }
+          ]});
+      this.http.put<Object>(this.baseUrl(box) + "device/" + dev.id + "/set", changes, { headers: this.headers(box) })
+          .subscribe((response) => {
+              dev.deserialize(response);
+              if (success) success(true);
+          }, (error) => {
+              this.apiError(error);
+              if (success) success(false);
+          });
+  }
+
+  fetchRules(box: Aquabox, success: (rules: RulesMap) => void, fail?: () => void) {
+      this.http.get<Object>(this.baseUrl(box) + "rules", { headers: this.headers(box) })
+          .subscribe((response) => {
+              this.parseRules(box, response, success)
+          }, (error) => {
+              this.apiError(error);
+              if (fail) {
+                  fail();
+              }
+          });
+  }
+
+  fetchRulesForDevice(box: Aquabox, device: Device, success: (rules: RulesMap) => void, fail?: () => void) {
+      this.http.get<Object>(this.baseUrl(box) + "rules/" + device.id, { headers: this.headers(box) })
+          .subscribe((response) => {
+              this.parseRules(box, response, success)
+          }, (error) => {
+              this.apiError(error);
+              if (fail) {
+                  fail();
+              }
+          });
+  }
+
+  updateDevice(box: Aquabox, device: Device, result?: (result: boolean) => void) {
+
+      let url = this.baseUrl(box) + "device/" + device.id;
+
+      let data = JSON.stringify(device.serialize());
+
+      this.http.post<Object>(url, data, { headers: this.headers(box) })
+          .subscribe((response) => {
+              if (result) {
+                  result(true);
+              }
+          }, (error) => {
+              this.apiError(error);
+              if (result) {
+                  result(false);
+              }
+          });
+  }
+
+  updateRule(box: Aquabox, rule: Rule, update: boolean, result?: (result: boolean) => void) {
+
+      let url = this.baseUrl(box) + "device/" + rule.device + "/rule";
+
+      let data = JSON.stringify(rule.serialize());
+
+      let req = update ? this.http.post<Object>(url, data, { headers: this.headers(box) })
+          : this.http.put<Object>(url, data, { headers: this.headers(box) });
+
+      req.subscribe((response) => {
+          if (result)
+              result(true);
+      }, (error) => {
+          this.apiError(error);
+          if (result) result(false);
+      });
+  }
+
+  deleteRule(box: Aquabox, rule: Rule, result?: (result: boolean) => void) {
+
+      let url = this.baseUrl(box) + "rule/" + rule.id
+
+      this.http.delete(url, { headers: this.headers(box) })
+          .subscribe(() => {
+              if (result)
+                result(true);
+          }, (error) => {
+              this.apiError(error);
+              if(result)
+                result(false);
+          });
+  }
+
+  getStatus(box: Aquabox, success?: (result: boolean) => void) {
+      let statusUrl = this.baseUrlFromConfiguration(box.configuration) + "status";
+      this.http.get<Object>(statusUrl, { headers: this.headers(box) }).subscribe((status) => {
+          if (!box.status) {
+              box.status = new BoxStatus();
+          }
+          box.status.deserialize(status["aquabox" as keyof Object])
+          if (success) {
+              success(true);
+          }
+      },
+          () => {
+              if (success)
+                  success(false);
+          }
+      )
+  }
+
+  scanForNetworks(box: Aquabox, success?: (result: boolean) => void) {
+      this.http.get<Object>(this.baseUrl(box) + "wifi/scan", { headers: this.headers(box) })
+          .subscribe((response) => {
+            if (success)
+              success(true);
+          }, (error) => {
+              this.apiError(error);
+          });
+  }
+
+  connectToWifi(box: Aquabox, wifi: WiFiInfo, success?: (uid: string) => void) {
+      let url = this.baseUrl(box) + "wifi/connect";
+
+      let data = JSON.stringify(wifi.serialize());
+
+      this.http.post<Object>(url, data, { headers: this.headers(box) })
+          .subscribe((response) => {
+            if (!success) { return }
+              if (response.hasOwnProperty("uuid")) {
+                  success(response["uuid" as keyof Object].toString());
+              } else {
+                  success("");
+              }
+          }, (error) => {
+              this.apiError(error);
+              if (success) {
+                  success("");
+              }
+          });
+  }
+
+  getNetworks(box: Aquabox, success?: (result: WiFiInfo[]) => void) {
+      this.http.get<Object>(this.baseUrl(box) + "wifi/networks", { headers: this.headers(box) })
+          .subscribe((response) => {
+              let raw = (response as any)["networks"];
+              if (!Array.isArray(raw)) {
+                  console.error("Networks are not an array!")
+              }
+
+              let res = [];
+              for (let o of raw as Array<String>) {
+                  let net = new WiFiInfo();
+                  net.deserialize(o);
+                  res.push(net);
+              }
+
+              if (success)
+                success(res);
+          }, (error) => {
+              this.apiError(error);
+          });
+  }
+
+  testConfiguration(configuration: AquaBoxConfiguration, result: (ok: boolean) => void) {
+      let statusUrl = this.baseUrlFromConfiguration(configuration) + "status";
+
+      const httpOptions = {
+          headers: new HttpHeaders({
+              'Content-Type' : 'application/json',
+              'Accept': 'application/json',
+              'boxId': configuration.serial,
+              'appId': this.APP_SERVER
+          })
+      };
+
+      this.http.get(statusUrl, httpOptions).subscribe(() => {
+          let conn = webSocket({
+            url: this.wsUrlFromConfiguration(configuration),
+            openObserver: {
+              next: () => {
+                conn.unsubscribe();
+                result(true)
+              }
+            },
+            closeObserver: {
+              next: () => { result(false); }
+            },
+            closingObserver: {
+              next: () => { result(false); }
+            }
+          })
+      },
+          () => { result(false); }
+      )
+  }
+}
+

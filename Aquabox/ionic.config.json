@@ -1,0 +1,7 @@
+{
+  "name": "Aquabox",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}

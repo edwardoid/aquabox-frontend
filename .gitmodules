@@ -1,0 +1,3 @@
+[submodule "Docker"]
+	path = Docker
+	url = https://github.com/robingenz/docker-ionic-capacitor.git

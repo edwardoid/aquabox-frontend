@@ -1,0 +1,26 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>
+      Blank
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-card (click)='addNewDevice();'>
+    <ion-card-header>
+      <ion-row justify-content-start>
+        <ion-col size="2">
+          <ion-thumbnail>
+            <img src="assets/icon/add_package.png" />
+          </ion-thumbnail>
+        </ion-col>
+        <ion-col align-self-center align-self-stretch>
+          <ion-label>
+            <h1>Add new host</h1>
+          </ion-label>
+        </ion-col>
+      </ion-row>
+    </ion-card-header>
+  </ion-card>
+</ion-content>
